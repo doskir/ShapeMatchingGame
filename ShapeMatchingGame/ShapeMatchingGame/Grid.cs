@@ -306,26 +306,35 @@ namespace ShapeMatchingGame
             Match match = new Match(involvedShapes, position, creates);
             return match;
         }
-
-
-        public bool CanBeSwapped(ShapeSlot shapeSlot,ShapeSlot otherShapeSlot)
+        public bool IsPossibleMove(Position from,Position to)
         {
-            Position shapeSlotPosition = GetShapeSlotPosition(shapeSlot);
-            Position otherShapeSlotPosition = GetShapeSlotPosition(otherShapeSlot);
             //check if the shapeslot is left of the other shapeslot
-            if (shapeSlotPosition.Column + 1 == otherShapeSlotPosition.Column && shapeSlotPosition.Row == otherShapeSlotPosition.Row)
+            if (from.Column + 1 == to.Column && from.Row == to.Row)
                 return true;
             //check if the shapeslot is right of the other shapeslot
-            if (shapeSlotPosition.Column - 1 == otherShapeSlotPosition.Column && shapeSlotPosition.Row == otherShapeSlotPosition.Row)
+            if (from.Column - 1 == to.Column && from.Row == to.Row)
                 return true;
             //check if the shapeslot is above the other shapeslot
-            if (shapeSlotPosition.Row + 1 == otherShapeSlotPosition.Row && shapeSlotPosition.Column == otherShapeSlotPosition.Column)
+            if (from.Row + 1 == to.Row && from.Column == to.Column)
                 return true;
             //check if the shapeslot is below the other shapeslot
-            if (shapeSlotPosition.Row - 1 == otherShapeSlotPosition.Row && shapeSlotPosition.Column == otherShapeSlotPosition.Column)
+            if (from.Row - 1 == to.Row && from.Column == to.Column)
                 return true;
-
-
+            return false;
+        }
+        public bool IsValidMove(Position from,Position to)
+        {
+            if (!IsPossibleMove(from, to))
+                return false;
+            Shape[,] shapes = ShapeSlotsToArray();
+            //swap the shapes
+            Shape temp = shapes[from.Row, from.Column];
+            shapes[from.Row, from.Column] = shapes[to.Row, to.Column];
+            shapes[to.Row, to.Column] = temp;
+            if (GetMatchAtPosition(shapes, to).IsValid || GetMatchAtPosition(shapes, from).IsValid)
+            {
+                return true;
+            }
             return false;
         }
         public Position GetShapeSlotPosition(ShapeSlot shapeSlot)
@@ -350,6 +359,22 @@ namespace ShapeMatchingGame
                 shapeSlot.Draw(spriteBatch);
             }
         }
+        public bool DoMove(Position from,Position to)
+        {
+            if(IsValidMove(from,to))
+            {
+                foreach(ShapeSlot shapeSlot in ShapeSlots)
+                {
+                    shapeSlot.RecentlyDestroyed = false;
+                    shapeSlot.RecentlySwappedTo = false;
+                }
+                Swap(ShapeSlots[from.Row, from.Column], ShapeSlots[to.Row, to.Column]);
+                ShapeSlots[from.Row, from.Column].RecentlySwappedTo = true;
+                ShapeSlots[to.Row, to.Column].RecentlySwappedTo = true;
+                return true;
+            }
+            return false;
+        }
         public void Clicked(Point position)
         {
             foreach(ShapeSlot slot in ShapeSlots)
@@ -369,33 +394,12 @@ namespace ShapeMatchingGame
                     }
                     else
                     {
-                        if(CanBeSwapped(_currentlyHighlightedShapeSlot,slot))
-                        {
-                            //swap the slots
-                            Swap(_currentlyHighlightedShapeSlot, slot);
-                            //check if the move was valid
-                            Match match = GetMatchAtPosition(ShapeSlotsToArray(), GetShapeSlotPosition(slot));
-                            if (!match.IsValid)
-                            {
-                                match = GetMatchAtPosition(ShapeSlotsToArray(),
-                                                           GetShapeSlotPosition(_currentlyHighlightedShapeSlot));
-                                //not a valid move, roll back
-                                if (!match.IsValid)
-                                    Swap(_currentlyHighlightedShapeSlot, slot);
-                            }
-                            foreach (ShapeSlot shapeSlot in ShapeSlots)
-                            {
-                                shapeSlot.RecentlyDestroyed = false;
-                                shapeSlot.RecentlySwappedTo = false;
-                            }
-                            //is a valid move
-                            slot.RecentlySwappedTo = true;
+                        Position from = GetShapeSlotPosition(_currentlyHighlightedShapeSlot);
+                        Position to = GetShapeSlotPosition(slot);
+                        DoMove(from, to);
 
-                            _currentlyHighlightedShapeSlot.IsHighlighted = false;
-                            _currentlyHighlightedShapeSlot = null;
-
-                        }
-                        return;
+                        _currentlyHighlightedShapeSlot.IsHighlighted = false;
+                        _currentlyHighlightedShapeSlot = null;
                     }
                 }
             }
@@ -407,7 +411,6 @@ namespace ShapeMatchingGame
             otherShapeSlot.Shape = temp;
             shapeSlot.Shape.DropTo(shapeSlot.Rectangle);
             otherShapeSlot.Shape.DropTo(otherShapeSlot.Rectangle);
-
         }
 
         public void DeleteAt(Point cursorPosition)
