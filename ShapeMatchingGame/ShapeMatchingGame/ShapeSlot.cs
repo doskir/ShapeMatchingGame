@@ -10,6 +10,9 @@ namespace ShapeMatchingGame
     class ShapeSlot : DrawableObject
     {
         public Shape Shape;
+        public bool RecentlyDropped;
+        public bool RecentlySwappedTo;
+        public bool IsHighlighted;
         public ShapeSlot(Rectangle rectangle)
         {
             Rectangle = rectangle;
@@ -24,7 +27,12 @@ namespace ShapeMatchingGame
         {
             Rectangle renderingRectangle = new Rectangle(Rectangle.X, Rectangle.Y, Rectangle.Width,
                                              Rectangle.Height);
-            spriteBatch.Draw(Texture, renderingRectangle, Color.Black);
+            Color frameColor = Color.Black;
+            if(IsHighlighted)
+                frameColor = Color.OrangeRed;
+            else if(RecentlyDropped)
+                frameColor = Color.Yellow;
+            spriteBatch.Draw(Texture, renderingRectangle, frameColor);
             Texture2D shapeTexture;
             Color shapeDrawColor;
             switch (Shape.Color)
@@ -64,6 +72,15 @@ namespace ShapeMatchingGame
                     break;
             }
             spriteBatch.Draw(shapeTexture, Rectangle, shapeDrawColor);
+            if(Shape.Type == ShapeType.Blast)
+            {
+                Texture2D overlay = Globals.Content.Load<Texture2D>("bomb-icon");
+                Rectangle centeredRectangle = new Rectangle(Rectangle.X + Rectangle.Width/4,
+                                                            Rectangle.Y + Rectangle.Height/4, Rectangle.Width/2,
+                                                            Rectangle.Height/2);
+
+                spriteBatch.Draw(overlay, centeredRectangle, Color.Black);
+            }
         }
     }
 }

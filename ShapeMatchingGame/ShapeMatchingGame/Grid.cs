@@ -13,8 +13,7 @@ namespace ShapeMatchingGame
         private int _rows;
         private int _columns;
         private RandomShapeGenerator _randomShapeGenerator;
-        public bool CountingScore;
-        public int Score;
+        private ShapeSlot _currentlyHighlightedShapeSlot;
         public Grid(Point position,int rows,int columns,int slotWidth,int slotHeight):this(position,rows,columns,slotWidth,slotHeight,-1)
         {
         }
@@ -48,6 +47,7 @@ namespace ShapeMatchingGame
                     if (shapeSlot.IsEmpty)
                     {
                         shapeSlot.Shape = _randomShapeGenerator.GetNextShape(ShapeType.Normal);
+                        shapeSlot.RecentlyDropped = true;
                         shapeCreated = true;
                         DropShapes();
                     }
@@ -60,14 +60,13 @@ namespace ShapeMatchingGame
             {
                 DropShapes();
                 FillGrid();
-            } while (CheckForMatches());
+            } while (HandleMatches());
         }
 
         public void DropShapes()
         {
             for (int column = 0; column < _columns; column++)
             {
-
                 bool shapeDropped;
                 do
                 {
@@ -84,6 +83,7 @@ namespace ShapeMatchingGame
                         {
                             //drop the current shape to the slow below
                             shapeSlotBelow.Shape = currentShapeSlot.Shape;
+                            shapeSlotBelow.RecentlyDropped = true;
                             currentShapeSlot.Shape = Shape.Empty;
                             shapeDropped = true;
                         }
@@ -103,62 +103,106 @@ namespace ShapeMatchingGame
             }
             return shapeArray;
         }
-        public bool CheckForMatches()
+        public bool HandleMatches()
         {
+            bool foundMatch = false;
             Shape[,] shapeArray = ShapeSlotsToArray();
-            for (int row = 0; row < _rows; row++)
+            List<Match> matches = GetMatches(shapeArray);
+            foreach(Match match in matches)
             {
-                for (int column = 0; column < _columns; column++)
+                if (match.IsValid)
                 {
-                    Position position = new Position(row, column);
-                    List<Position> matchedShapes = MatchedShapesAt(shapeArray, position);
-                    if (matchedShapes.Count > 0)
+                    foundMatch = true;
+                    ShapeColor color = ShapeColor.None;
+                    foreach (Position position in match.InvolvedPositions)
                     {
-                        matchedShapes.Add(position);
-                        foreach (Position matchedPosition in matchedShapes)
+                        color = ShapeSlots[position.Row, position.Column].Shape.Color;
+                        ShapeSlots[position.Row, position.Column].Shape = Shape.Empty;
+                    }
+
+                    if (match.Creates == Creates.Blast)
+                    {
+                        ShapeSlot mostImportantShapeSlot = null;
+                        foreach (Position position in match.InvolvedPositions)
                         {
-                            ShapeSlots[matchedPosition.Row, matchedPosition.Column].Shape = Shape.Empty;
+                            if (ShapeSlots[position.Row, position.Column].RecentlySwappedTo)
+                            {
+                                mostImportantShapeSlot = ShapeSlots[position.Row, position.Column];
+                                break;
+                            }
+                            if (ShapeSlots[position.Row, position.Column].RecentlyDropped)
+                                mostImportantShapeSlot = ShapeSlots[position.Row, position.Column];
                         }
-                        return true;
+                        if (mostImportantShapeSlot == null)
+                            throw new Exception("blast match found, no valid shapeslot found");
+                        mostImportantShapeSlot.Shape = new Shape(color, ShapeType.Blast);
+                    }
+
+                }
+            }
+            return foundMatch;
+
+        }
+        List<Match> GetMatches(Shape[,] shapeArray)
+        {
+            List<Match> matches = new List<Match>();
+            for (int originRow = 0; originRow < _rows;originRow++)
+            {
+                for (int originColumn = 0; originColumn < _columns; originColumn++)
+                {
+                    Match match = GetMatchAtPosition(shapeArray, new Position(originRow, originColumn));
+                    if (match.IsValid)
+                    {
+                        bool duplicateMatch = false;
+                        //prevent duplicate match adding
+                        foreach (Match existingMatch in matches)
+                        {
+                            if (existingMatch.InvolvedPositions.Contains(match.Center))
+                            {
+                                duplicateMatch = true;
+                                break;
+                            }
+                        }
+                        if (!duplicateMatch)
+                            matches.Add(match);
                     }
                 }
             }
-            return false;
+            return matches;
         }
-
-        List<Position> MatchedShapesAt(Shape[,] shapeArray, Position origin)
+        Match GetMatchAtPosition(Shape[,] shapeArray,Position position)
         {
-            ShapeColor myColor = shapeArray[origin.Row, origin.Column].Color;
+            ShapeColor myColor = shapeArray[position.Row, position.Column].Color;
             List<Position> matchingShapesLeft = new List<Position>();
-            for (int column = origin.Column - 1; column >= 0; column--)
+            for (int column = position.Column - 1; column >= 0; column--)
             {
-                if (shapeArray[origin.Row, column].Color == myColor)
-                    matchingShapesLeft.Add(new Position(origin.Row, column));
+                if (shapeArray[position.Row, column].Color == myColor)
+                    matchingShapesLeft.Add(new Position(position.Row, column));
                 else
                     break;
             }
             List<Position> matchingShapesRight = new List<Position>();
-            for (int column = origin.Column + 1; column < 8; column++)
+            for (int column = position.Column + 1; column < 8; column++)
             {
-                if (shapeArray[origin.Row, column].Color == myColor)
-                    matchingShapesRight.Add(new Position(origin.Row, column));
+                if (shapeArray[position.Row, column].Color == myColor)
+                    matchingShapesRight.Add(new Position(position.Row, column));
                 else
                     break;
             }
 
             List<Position> matchingShapesAbove = new List<Position>();
-            for (int row = origin.Row - 1; row >= 0; row--)
+            for (int row = position.Row - 1; row >= 0; row--)
             {
-                if (shapeArray[row, origin.Column].Color == myColor)
-                    matchingShapesAbove.Add(new Position(row, origin.Column));
+                if (shapeArray[row, position.Column].Color == myColor)
+                    matchingShapesAbove.Add(new Position(row, position.Column));
                 else
                     break;
             }
             List<Position> matchingShapesBelow = new List<Position>();
-            for (int row = origin.Row + 1; row < 8; row++)
+            for (int row = position.Row + 1; row < 8; row++)
             {
-                if (shapeArray[row, origin.Column].Color == myColor)
-                    matchingShapesBelow.Add(new Position(row, origin.Column));
+                if (shapeArray[row, position.Column].Color == myColor)
+                    matchingShapesBelow.Add(new Position(row, position.Column));
                 else
                     break;
             }
@@ -172,20 +216,63 @@ namespace ShapeMatchingGame
             if (verticalMatch.Count < 2)
                 verticalMatch.RemoveRange(0, verticalMatch.Count);
 
-            if (horizontalMatch.Count >= 3)
+            if (horizontalMatch.Count == 0 && verticalMatch.Count == 0)
+                return Match.Empty;
+
+            Creates creates = Creates.Nothing;
+            if (horizontalMatch.Count >= 4 || verticalMatch.Count >= 4)
             {
-                //blast shape
+                creates = Creates.Star;
             }
             else if (horizontalMatch.Count >= 2 && verticalMatch.Count >= 2)
             {
-                //Cross Shape will be created
+                creates = Creates.Cross;
             }
-
+            else if (horizontalMatch.Count >= 3 || verticalMatch.Count >= 3)
+            {
+                creates = Creates.Blast;
+            }
             List<Position> involvedShapes = new List<Position>(horizontalMatch);
             involvedShapes.AddRange(verticalMatch);
-            return involvedShapes;
+            Match match = new Match(involvedShapes, position, creates);
+            return match;
         }
 
+
+        public bool CanBeSwapped(ShapeSlot shapeSlot,ShapeSlot otherShapeSlot)
+        {
+            Position shapeSlotPosition = GetShapeSlotPosition(shapeSlot);
+            Position otherShapeSlotPosition = GetShapeSlotPosition(otherShapeSlot);
+            //check if the shapeslot is left of the other shapeslot
+            if (shapeSlotPosition.Column + 1 == otherShapeSlotPosition.Column && shapeSlotPosition.Row == otherShapeSlotPosition.Row)
+                return true;
+            //check if the shapeslot is right of the other shapeslot
+            if (shapeSlotPosition.Column - 1 == otherShapeSlotPosition.Column && shapeSlotPosition.Row == otherShapeSlotPosition.Row)
+                return true;
+            //check if the shapeslot is above the other shapeslot
+            if (shapeSlotPosition.Row + 1 == otherShapeSlotPosition.Row && shapeSlotPosition.Column == otherShapeSlotPosition.Column)
+                return true;
+            //check if the shapeslot is below the other shapeslot
+            if (shapeSlotPosition.Row - 1 == otherShapeSlotPosition.Row && shapeSlotPosition.Column == otherShapeSlotPosition.Column)
+                return true;
+
+
+            return false;
+        }
+        public Position GetShapeSlotPosition(ShapeSlot shapeSlot)
+        {
+            for (int row = 0; row < _rows; row++)
+            {
+                for (int column = 0; column < _columns; column++)
+                {
+                    if (ShapeSlots[row, column] == shapeSlot)
+                    {
+                        return new Position(row, column);
+                    }
+                }
+            }
+            throw new Exception("Shapeslot is not part of the grid. WTF!");
+        }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
@@ -200,11 +287,55 @@ namespace ShapeMatchingGame
             {
                 if(slot.Rectangle.Contains(position))
                 {
-                    slot.Shape = Shape.Empty;
-                    return;
+                    if(slot == _currentlyHighlightedShapeSlot)
+                    {
+                        slot.IsHighlighted = false;
+                        _currentlyHighlightedShapeSlot = null;
+                    }
+                    else if (_currentlyHighlightedShapeSlot == null)
+                    {
+                        slot.IsHighlighted = true;
+                        _currentlyHighlightedShapeSlot = slot;
+                        return;
+                    }
+                    else
+                    {
+                        if(CanBeSwapped(_currentlyHighlightedShapeSlot,slot))
+                        {
+                            //swap the slots
+                            Swap(_currentlyHighlightedShapeSlot, slot);
+                            //check if the move was valid
+                            Match match = GetMatchAtPosition(ShapeSlotsToArray(), GetShapeSlotPosition(slot));
+                            if (!match.IsValid)
+                            {
+                                match = GetMatchAtPosition(ShapeSlotsToArray(),
+                                                           GetShapeSlotPosition(_currentlyHighlightedShapeSlot));
+                                //not a valid move, roll back
+                                if (!match.IsValid)
+                                    Swap(_currentlyHighlightedShapeSlot, slot);
+                            }
+                            foreach (ShapeSlot shapeSlot in ShapeSlots)
+                            {
+                                shapeSlot.RecentlyDropped = false;
+                                shapeSlot.RecentlySwappedTo = false;
+                            }
+                            //is a valid move
+                            slot.RecentlySwappedTo = true;
+
+                            _currentlyHighlightedShapeSlot.IsHighlighted = false;
+                            _currentlyHighlightedShapeSlot = null;
+
+                        }
+                        return;
+                    }
                 }
             }
-            
+        }
+        public void Swap(ShapeSlot shapeSlot,ShapeSlot otherShapeSlot)
+        {
+            Shape temp = shapeSlot.Shape;
+            shapeSlot.Shape = otherShapeSlot.Shape;
+            otherShapeSlot.Shape = temp;
         }
     }
 }
