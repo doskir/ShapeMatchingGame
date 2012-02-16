@@ -79,6 +79,14 @@ namespace ShapeMatchingGame
                     grid.Clicked(cursorPosition);
                 }
             }
+            if(currentState.RightButton == ButtonState.Pressed && _previousState.RightButton == ButtonState.Released)
+            {
+                Point cursorPosition = new Point(currentState.X, currentState.Y);
+                if (grid.Rectangle.Contains(cursorPosition))
+                {
+                    grid.DeleteAt(cursorPosition);
+                }
+            }
             _previousState = currentState;
 
             grid.Update();

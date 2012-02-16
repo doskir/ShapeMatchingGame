@@ -14,6 +14,7 @@ namespace ShapeMatchingGame
         private int _columns;
         private RandomShapeGenerator _randomShapeGenerator;
         private ShapeSlot _currentlyHighlightedShapeSlot;
+        public int Score;
         public Grid(Point position,int rows,int columns,int slotWidth,int slotHeight):this(position,rows,columns,slotWidth,slotHeight,-1)
         {
         }
@@ -37,30 +38,37 @@ namespace ShapeMatchingGame
         }
         public void FillGrid()
         {
-            for(int column = 0;column < _columns;column++)
+            for (int column = 0; column < _columns; column++)
             {
-                bool shapeCreated;
-                do
+                ShapeSlot shapeSlot = ShapeSlots[0, column];
+                if (shapeSlot.IsEmpty)
                 {
-                    shapeCreated = false;
-                    ShapeSlot shapeSlot = ShapeSlots[0, column];
-                    if (shapeSlot.IsEmpty)
+                    Rectangle targetRectangle = new Rectangle(shapeSlot.Rectangle.X, -50, 50, 50);
+                    bool willIntersect = false;
+                    for (int row = 0; row < _rows; row++)
                     {
-                        shapeSlot.Shape = _randomShapeGenerator.GetNextShape(ShapeType.Normal);
-                        shapeSlot.RecentlyDropped = true;
-                        shapeCreated = true;
-                        DropShapes();
+                        if (targetRectangle.Intersects(ShapeSlots[row, column].Shape.Rectangle))
+                            willIntersect = true;
                     }
-                } while (shapeCreated);
+                    if (willIntersect)
+                    {
+                        break;
+                    }
+                    shapeSlot.Shape = _randomShapeGenerator.GetNextShape(ShapeType.Normal);
+                    shapeSlot.Shape.Rectangle.X = shapeSlot.Rectangle.X;
+                    shapeSlot.Shape.DropTo(shapeSlot.Rectangle);
+                    shapeSlot.RecentlyDropped = true;
+                    DropShapes();
+                }
             }
         }
-        public void Update()
+        public override void Update()
         {
-            do
-            {
-                DropShapes();
-                FillGrid();
-            } while (HandleMatches());
+            foreach (ShapeSlot shapeSlot in ShapeSlots)
+                shapeSlot.Update();
+            HandleMatches();
+            DropShapes();
+            FillGrid();
         }
 
         public void DropShapes()
@@ -83,6 +91,7 @@ namespace ShapeMatchingGame
                         {
                             //drop the current shape to the slow below
                             shapeSlotBelow.Shape = currentShapeSlot.Shape;
+                            shapeSlotBelow.Shape.DropTo(shapeSlotBelow.Rectangle);
                             shapeSlotBelow.RecentlyDropped = true;
                             currentShapeSlot.Shape = Shape.Empty;
                             shapeDropped = true;
@@ -118,6 +127,7 @@ namespace ShapeMatchingGame
                     {
                         color = ShapeSlots[position.Row, position.Column].Shape.Color;
                         ShapeSlots[position.Row, position.Column].Shape = Shape.Empty;
+                        Score += 100;
                     }
 
                     if (match.Creates == Creates.Blast)
@@ -136,6 +146,10 @@ namespace ShapeMatchingGame
                         if (mostImportantShapeSlot == null)
                             throw new Exception("blast match found, no valid shapeslot found");
                         mostImportantShapeSlot.Shape = new Shape(color, ShapeType.Blast);
+                        mostImportantShapeSlot.Shape.Rectangle.X = mostImportantShapeSlot.Rectangle.X;
+                        mostImportantShapeSlot.Shape.Rectangle.Y = mostImportantShapeSlot.Rectangle.Y;
+
+                        Score += 500;
                     }
 
                 }
@@ -173,6 +187,8 @@ namespace ShapeMatchingGame
         Match GetMatchAtPosition(Shape[,] shapeArray,Position position)
         {
             ShapeColor myColor = shapeArray[position.Row, position.Column].Color;
+            if(myColor == ShapeColor.None)
+                return Match.Empty;
             List<Position> matchingShapesLeft = new List<Position>();
             for (int column = position.Column - 1; column >= 0; column--)
             {
@@ -336,6 +352,20 @@ namespace ShapeMatchingGame
             Shape temp = shapeSlot.Shape;
             shapeSlot.Shape = otherShapeSlot.Shape;
             otherShapeSlot.Shape = temp;
+            shapeSlot.Shape.DropTo(shapeSlot.Rectangle);
+            otherShapeSlot.Shape.DropTo(otherShapeSlot.Rectangle);
+
+        }
+
+        public void DeleteAt(Point cursorPosition)
+        {
+            foreach (ShapeSlot slot in ShapeSlots)
+            {
+                if (slot.Rectangle.Contains(cursorPosition))
+                {
+                    slot.Shape = Shape.Empty;
+                }
+            }
         }
     }
 }

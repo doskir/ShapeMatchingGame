@@ -12,5 +12,6 @@ namespace ShapeMatchingGame
         public Rectangle Rectangle;
         public Texture2D Texture;
         public abstract void Draw(SpriteBatch spriteBatch);
+        public abstract void Update();
     }
 }
