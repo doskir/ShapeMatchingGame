@@ -178,7 +178,6 @@ namespace ShapeMatchingGame
                 }
             }
             return foundMatch;
-
         }
         List<Match> GetMatches(Shape[,] shapeArray)
         {
@@ -221,7 +220,7 @@ namespace ShapeMatchingGame
                     break;
             }
             List<Position> matchingShapesRight = new List<Position>();
-            for (int column = position.Column + 1; column < 8; column++)
+            for (int column = position.Column + 1; column < shapeArray.GetLength(1); column++)
             {
                 if (shapeArray[position.Row, column].Color == myColor)
                     matchingShapesRight.Add(new Position(position.Row, column));
@@ -238,7 +237,7 @@ namespace ShapeMatchingGame
                     break;
             }
             List<Position> matchingShapesBelow = new List<Position>();
-            for (int row = position.Row + 1; row < 8; row++)
+            for (int row = position.Row + 1; row < shapeArray.GetLength(0); row++)
             {
                 if (shapeArray[row, position.Column].Color == myColor)
                     matchingShapesBelow.Add(new Position(row, position.Column));

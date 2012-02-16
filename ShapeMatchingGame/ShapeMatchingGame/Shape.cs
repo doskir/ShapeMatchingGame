@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShapeMatchingGame
 {
-    class Shape : DrawableObject
+    class Shape : DrawableObject,ICloneable
     {
         public ShapeColor Color;
         public ShapeType Type;
@@ -25,6 +25,8 @@ namespace ShapeMatchingGame
         private Rectangle _targetRectangle = Rectangle.Empty;
         private Vector2 _moveSpeed;
         public bool Moving;
+        public bool RecentlySwapped;
+        public bool RecentlyDropped;
         public void DropTo(Rectangle rectangle)
         {
             _targetRectangle = rectangle;
@@ -113,6 +115,17 @@ namespace ShapeMatchingGame
                     Moving = false;
                 }
             }
+        }
+
+        public object Clone()
+        {
+            Shape newShape = new Shape(Color, Type);
+            newShape.Moving = Moving;
+            newShape.RecentlyDropped = true;
+            newShape.RecentlySwapped = true;
+            newShape._moveSpeed = _moveSpeed;
+            newShape._targetRectangle = _targetRectangle;
+            return newShape;
         }
     }
 

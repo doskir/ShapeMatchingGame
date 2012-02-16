@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using ShapeMatchingGame.MoveFinder;
 using ShapeMatchingGame.Utility;
 
 namespace ShapeMatchingGame
@@ -47,7 +48,7 @@ namespace ShapeMatchingGame
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Globals.Content = Content;
             _spriteFont = Content.Load<SpriteFont>("SpriteFont1");
-            _grid = new Grid(new Point(20,20),8, 8, 50, 50);
+            _grid = new Grid(new Point(20, 20), 8, 8, 50, 50);
             // TODO: use this.Content to load your game content here
         }
 
@@ -60,7 +61,8 @@ namespace ShapeMatchingGame
             // TODO: Unload any non ContentManager content here
         }
 
-        private MouseState _previousState;
+        private MouseState _previousMouseState;
+        private KeyboardState _previousKeyboardState;
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -71,24 +73,36 @@ namespace ShapeMatchingGame
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-            MouseState currentState = Mouse.GetState();
-            if(currentState.LeftButton == ButtonState.Pressed && _previousState.LeftButton == ButtonState.Released)
+            MouseState currentMouseState = Mouse.GetState();
+            KeyboardState currentKeyboardState = Keyboard.GetState();
+            if(currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released)
             {
-                Point cursorPosition = new Point(currentState.X, currentState.Y);
+                Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
                 if(_grid.Rectangle.Contains(cursorPosition))
                 {
                     _grid.Clicked(cursorPosition);
                 }
             }
-            if(currentState.RightButton == ButtonState.Pressed && _previousState.RightButton == ButtonState.Released)
+            if(currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
             {
-                Point cursorPosition = new Point(currentState.X, currentState.Y);
+                Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
                 if (_grid.Rectangle.Contains(cursorPosition))
                 {
                     _grid.DebugFunctionAt(cursorPosition);
                 }
             }
-            _previousState = currentState;
+
+            if (currentKeyboardState.IsKeyDown(Keys.B) && _previousKeyboardState.IsKeyUp(Keys.B))
+            {
+                MoveFinder.IMoveFinder moveFinder = new SimpleMoveFinder();
+                Move bestMove = moveFinder.GetBestMove(_grid.ShapeSlotsToArray(), 1);
+                if (bestMove != null)
+                    _grid.DoMove(bestMove.From, bestMove.To);
+            }
+
+
+            _previousKeyboardState = currentKeyboardState;
+            _previousMouseState = currentMouseState;
 
             _grid.Update();
 
