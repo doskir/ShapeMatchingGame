@@ -11,16 +11,20 @@ namespace ShapeMatchingGame
     {
         public ShapeColor Color;
         public ShapeType Type;
-        public Shape(ShapeColor color,ShapeType type)
+        public Shape(ShapeColor color,ShapeType type):this(color,type,new Rectangle(0,-50,50,50))
+        {
+        }
+        public Shape(ShapeColor color,ShapeType type,Rectangle creationRectangle)
         {
             Color = color;
             Type = type;
-            Rectangle = new Rectangle(0, -50, 50, 50);
+            Rectangle = creationRectangle;
         }
 
         public static readonly Shape Empty = new Shape(ShapeColor.None, ShapeType.None);
         private Rectangle _targetRectangle = Rectangle.Empty;
         private Vector2 _moveSpeed;
+        public bool Moving;
         public void DropTo(Rectangle rectangle)
         {
             _targetRectangle = rectangle;
@@ -30,6 +34,7 @@ namespace ShapeMatchingGame
             _moveSpeed.X = 6.0f;
             if (_targetRectangle.X < Rectangle.X)
                 _moveSpeed.X *= -1;
+            Moving = true;
         }
         public override void Draw(SpriteBatch spriteBatch)
         {
@@ -104,6 +109,7 @@ namespace ShapeMatchingGame
                 if (_moveSpeed.X == 0 && _moveSpeed.Y == 0)
                 {
                     _targetRectangle = Rectangle.Empty;
+                    Moving = false;
                 }
             }
         }

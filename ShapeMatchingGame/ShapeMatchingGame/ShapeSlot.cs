@@ -7,41 +7,47 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShapeMatchingGame
 {
-    class ShapeSlot : DrawableObject
+    internal class ShapeSlot : DrawableObject
     {
         private Shape _shape;
+
         public Shape Shape
         {
             get { return _shape; }
-            set {
+            set
+            {
                 _shape = value;
                 _shape.DropTo(Rectangle);
             }
         }
-        public bool RecentlyDropped;
+
+        public bool RecentlyDestroyed;
         public bool RecentlySwappedTo;
         public bool IsHighlighted;
+
         public ShapeSlot(Rectangle rectangle)
         {
             Rectangle = rectangle;
             Shape = new Shape(ShapeColor.None, ShapeType.None);
             Texture = Globals.Content.Load<Texture2D>("shapeSlotFrame");
         }
+
         public bool IsEmpty
         {
             get { return Shape.Color == ShapeColor.None || Shape.Type == ShapeType.None; }
         }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             Rectangle renderingRectangle = new Rectangle(Rectangle.X, Rectangle.Y, Rectangle.Width,
-                                             Rectangle.Height);
+                                                         Rectangle.Height);
             Color frameColor = Color.Black;
-            if(IsHighlighted)
+            if (IsHighlighted)
                 frameColor = Color.OrangeRed;
-            else if(RecentlyDropped)
+            else if (RecentlyDestroyed)
                 frameColor = Color.Yellow;
             spriteBatch.Draw(Texture, renderingRectangle, frameColor);
-            if(Shape.Rectangle.X == 0 && Shape.Rectangle.Y == 0)
+            if (Shape.Rectangle.X == 0 && Shape.Rectangle.Y == 0)
             {
                 Shape.Rectangle.X = Rectangle.X;
                 Shape.Rectangle.Y = Rectangle.Y;
@@ -53,5 +59,17 @@ namespace ShapeMatchingGame
         {
             Shape.Update();
         }
+
+        public void ClearSlot()
+        {
+            Shape = Shape.Empty;
+        }
+
+        public void DestroyShape()
+        {
+            ClearSlot();
+            RecentlyDestroyed = true;
+        }
     }
 }
+    

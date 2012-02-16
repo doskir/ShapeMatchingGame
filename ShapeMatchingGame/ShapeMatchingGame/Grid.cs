@@ -36,36 +36,58 @@ namespace ShapeMatchingGame
             Rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
             FillGrid();
         }
+        public bool MovesAllowed
+        {
+            get
+            {
+                foreach (ShapeSlot shapeSlot in ShapeSlots)
+                    if (shapeSlot.Shape.Moving)
+                        return false;
+                return true;
+            }
+        }
         public void FillGrid()
         {
+            if (!MovesAllowed)
+                return;
             for (int column = 0; column < _columns; column++)
             {
-                ShapeSlot shapeSlot = ShapeSlots[0, column];
-                if (shapeSlot.IsEmpty)
+                for (int row = _rows - 1; row >= 0; row--)
                 {
-                    Rectangle targetRectangle = new Rectangle(shapeSlot.Rectangle.X, -50, 50, 50);
-                    bool willIntersect = false;
-                    for (int row = 0; row < _rows; row++)
+                    ShapeSlot shapeSlot = ShapeSlots[0, column];
+                    if (shapeSlot.IsEmpty)
                     {
-                        if (targetRectangle.Intersects(ShapeSlots[row, column].Shape.Rectangle))
-                            willIntersect = true;
+                        Rectangle creationRectangle = new Rectangle(shapeSlot.Rectangle.X, 0, 50, 50);
+                        bool willIntersect;
+                        do
+                        {
+                            creationRectangle.Y -= 50;
+                            willIntersect = false;
+                            for (int compRow = 0; compRow < _rows; compRow++)
+                            {
+                                if (creationRectangle.Intersects(ShapeSlots[compRow, column].Shape.Rectangle))
+                                {
+                                    willIntersect = true;
+                                    break;
+                                }
+                            }
+                        } while (willIntersect);
+                        shapeSlot.Shape = _randomShapeGenerator.GetNextShape(ShapeType.Normal);
+                        shapeSlot.Shape.Rectangle = creationRectangle;
+                        shapeSlot.Shape.Rectangle.X = shapeSlot.Rectangle.X;
+                        shapeSlot.Shape.DropTo(shapeSlot.Rectangle);
+                        DropShapes();
                     }
-                    if (willIntersect)
-                    {
-                        break;
-                    }
-                    shapeSlot.Shape = _randomShapeGenerator.GetNextShape(ShapeType.Normal);
-                    shapeSlot.Shape.Rectangle.X = shapeSlot.Rectangle.X;
-                    shapeSlot.Shape.DropTo(shapeSlot.Rectangle);
-                    shapeSlot.RecentlyDropped = true;
-                    DropShapes();
                 }
             }
         }
+
         public override void Update()
         {
             foreach (ShapeSlot shapeSlot in ShapeSlots)
                 shapeSlot.Update();
+            if (!MovesAllowed)
+                return;
             HandleMatches();
             DropShapes();
             FillGrid();
@@ -92,8 +114,7 @@ namespace ShapeMatchingGame
                             //drop the current shape to the slow below
                             shapeSlotBelow.Shape = currentShapeSlot.Shape;
                             shapeSlotBelow.Shape.DropTo(shapeSlotBelow.Rectangle);
-                            shapeSlotBelow.RecentlyDropped = true;
-                            currentShapeSlot.Shape = Shape.Empty;
+                            currentShapeSlot.ClearSlot();
                             shapeDropped = true;
                         }
                     }
@@ -126,7 +147,40 @@ namespace ShapeMatchingGame
                     foreach (Position position in match.InvolvedPositions)
                     {
                         color = ShapeSlots[position.Row, position.Column].Shape.Color;
-                        ShapeSlots[position.Row, position.Column].Shape = Shape.Empty;
+                        ShapeType type = ShapeSlots[position.Row, position.Column].Shape.Type;
+                        if(type == ShapeType.Blast)
+                        {
+                            List<Position> positionsToClear = new List<Position>();
+                            if (position.Row > 0)
+                            {
+                                positionsToClear.Add(new Position(position.Row - 1, position.Column));
+                                if (position.Column > 0)
+                                    positionsToClear.Add(new Position(position.Row - 1, position.Column - 1));
+                                if (position.Column < _columns - 1)
+                                    positionsToClear.Add(new Position(position.Row - 1, position.Column + 1));
+                            }
+                            if(position.Row < _rows -1)
+                            {
+                                positionsToClear.Add(new Position(position.Row + 1, position.Column));
+                                if (position.Column > 0)
+                                    positionsToClear.Add(new Position(position.Row + 1, position.Column - 1));
+                                if (position.Column < _columns - 1)
+                                    positionsToClear.Add(new Position(position.Row + 1, position.Column + 1));
+                            }
+                            if (position.Column > 0)
+                                positionsToClear.Add(new Position(position.Row, position.Column - 1));
+                            if (position.Column < _columns - 1)
+                                positionsToClear.Add(new Position(position.Row, position.Column + 1));
+
+                            foreach(Position blastPosition in positionsToClear)
+                            {
+                                ShapeSlots[blastPosition.Row, blastPosition.Column].DestroyShape();
+                                Score += 100;
+                            }
+                        }
+
+
+                        ShapeSlots[position.Row, position.Column].DestroyShape();
                         Score += 100;
                     }
 
@@ -140,7 +194,7 @@ namespace ShapeMatchingGame
                                 mostImportantShapeSlot = ShapeSlots[position.Row, position.Column];
                                 break;
                             }
-                            if (ShapeSlots[position.Row, position.Column].RecentlyDropped)
+                            if (ShapeSlots[position.Row, position.Column].RecentlyDestroyed)
                                 mostImportantShapeSlot = ShapeSlots[position.Row, position.Column];
                         }
                         if (mostImportantShapeSlot == null)
@@ -151,7 +205,6 @@ namespace ShapeMatchingGame
 
                         Score += 500;
                     }
-
                 }
             }
             return foundMatch;
@@ -332,7 +385,7 @@ namespace ShapeMatchingGame
                             }
                             foreach (ShapeSlot shapeSlot in ShapeSlots)
                             {
-                                shapeSlot.RecentlyDropped = false;
+                                shapeSlot.RecentlyDestroyed = false;
                                 shapeSlot.RecentlySwappedTo = false;
                             }
                             //is a valid move
