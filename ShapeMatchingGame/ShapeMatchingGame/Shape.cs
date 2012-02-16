@@ -77,15 +77,16 @@ namespace ShapeMatchingGame
                     break;
             }
             spriteBatch.Draw(shapeTexture, Rectangle, shapeDrawColor);
+            Texture2D overlay = null;
+            Rectangle centeredRectangle = new Rectangle(Rectangle.X + Rectangle.Width/4,
+                                                        Rectangle.Y + Rectangle.Height/4, Rectangle.Width/2,
+                                                        Rectangle.Height/2);
             if (Type == ShapeType.Blast)
-            {
-                Texture2D overlay = Globals.Content.Load<Texture2D>("bomb-icon");
-                Rectangle centeredRectangle = new Rectangle(Rectangle.X + Rectangle.Width / 4,
-                                                            Rectangle.Y + Rectangle.Height / 4, Rectangle.Width / 2,
-                                                            Rectangle.Height / 2);
-
+                overlay = Globals.Content.Load<Texture2D>("bomb-icon");
+            if (Type == ShapeType.Cross)
+                overlay = Globals.Content.Load<Texture2D>("cross");
+            if (overlay != null)
                 spriteBatch.Draw(overlay, centeredRectangle, Microsoft.Xna.Framework.Color.Black);
-            }
         }
 
         public override void Update()

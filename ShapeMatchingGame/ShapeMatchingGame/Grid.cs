@@ -149,8 +149,7 @@ namespace ShapeMatchingGame
                         color = ShapeSlots[position.Row, position.Column].Shape.Color;
                         DestroyShape(position);
                     }
-
-                    if (match.Creates == Creates.Blast)
+                    if (match.Creates != Creates.Nothing)
                     {
                         ShapeSlot mostImportantShapeSlot = null;
                         foreach (Position position in match.InvolvedPositions)
@@ -164,12 +163,17 @@ namespace ShapeMatchingGame
                                 mostImportantShapeSlot = ShapeSlots[position.Row, position.Column];
                         }
                         if (mostImportantShapeSlot == null)
-                            throw new Exception("blast match found, no valid shapeslot found");
-                        mostImportantShapeSlot.Shape = new Shape(color, ShapeType.Blast);
+                            throw new Exception("creating match found, no valid shapeslot found");
+                        if (match.Creates == Creates.Blast)
+                        {
+                            mostImportantShapeSlot.Shape = new Shape(color, ShapeType.Blast);
+                        }
+                        if(match.Creates == Creates.Cross)
+                        {
+                            mostImportantShapeSlot.Shape = new Shape(color, ShapeType.Cross);
+                        }
                         mostImportantShapeSlot.Shape.Rectangle.X = mostImportantShapeSlot.Rectangle.X;
                         mostImportantShapeSlot.Shape.Rectangle.Y = mostImportantShapeSlot.Rectangle.Y;
-
-                        Score += 500;
                     }
                 }
             }
@@ -388,7 +392,7 @@ namespace ShapeMatchingGame
             {
                 if (slot.Rectangle.Contains(cursorPosition))
                 {
-                    slot.Shape.Type = ShapeType.Blast;
+                    slot.ClearSlot();
                 }
             }
         }
@@ -425,6 +429,24 @@ namespace ShapeMatchingGame
                 {
                     DestroyShape(blastPosition);
                 }
+            }
+            if(type == ShapeType.Cross)
+            {
+                List<Position> positionsToClear = new List<Position>();
+                for(int row = 0; row < _rows;row++)
+                {
+                    if (row == position.Row)
+                        continue;
+                    positionsToClear.Add(new Position(row, position.Column));
+                }
+                for(int column = 0;column < _columns;column++)
+                {
+                    if (column == position.Column)
+                        continue;
+                    positionsToClear.Add(new Position(position.Row, column));
+                }
+                foreach (Position crossPosition in positionsToClear)
+                    DestroyShape(crossPosition);
             }
             if (type != ShapeType.None)
             {
