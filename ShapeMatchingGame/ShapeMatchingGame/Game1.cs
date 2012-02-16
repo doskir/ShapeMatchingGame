@@ -46,7 +46,8 @@ namespace ShapeMatchingGame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Globals.Content = Content;
-            grid = new Grid(new Point(20,20),8, 8, 50, 50);
+            _spriteFont = Content.Load<SpriteFont>("SpriteFont1");
+            _grid = new Grid(new Point(20,20),8, 8, 50, 50);
             // TODO: use this.Content to load your game content here
         }
 
@@ -74,29 +75,30 @@ namespace ShapeMatchingGame
             if(currentState.LeftButton == ButtonState.Pressed && _previousState.LeftButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentState.X, currentState.Y);
-                if(grid.Rectangle.Contains(cursorPosition))
+                if(_grid.Rectangle.Contains(cursorPosition))
                 {
-                    grid.Clicked(cursorPosition);
+                    _grid.Clicked(cursorPosition);
                 }
             }
             if(currentState.RightButton == ButtonState.Pressed && _previousState.RightButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentState.X, currentState.Y);
-                if (grid.Rectangle.Contains(cursorPosition))
+                if (_grid.Rectangle.Contains(cursorPosition))
                 {
-                    grid.DeleteAt(cursorPosition);
+                    _grid.DebugFunctionAt(cursorPosition);
                 }
             }
             _previousState = currentState;
 
-            grid.Update();
+            _grid.Update();
 
             // TODO: Add your update logic here
 
             base.Update(gameTime);
         }
 
-        private Grid grid;
+        private Grid _grid;
+        private SpriteFont _spriteFont;
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -105,7 +107,14 @@ namespace ShapeMatchingGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-            grid.Draw(spriteBatch);
+            _grid.Draw(spriteBatch);
+            string scoreString = "Score: " + _grid.Score;
+            float width = _spriteFont.MeasureString(scoreString).X;
+            Vector2 textPosition = new Vector2(graphics.GraphicsDevice.Viewport.Width, 20);
+            textPosition.X -= width;
+            textPosition.X -= 20;
+            spriteBatch.DrawString(_spriteFont, scoreString, textPosition, Color.Black);
+
             spriteBatch.End();
 
             // TODO: Add your drawing code here
