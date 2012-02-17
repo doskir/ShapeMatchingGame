@@ -15,6 +15,7 @@ namespace ShapeMatchingGame
         private RandomShapeGenerator _randomShapeGenerator;
         private ShapeSlot _currentlyHighlightedShapeSlot;
         public int Score;
+        public int Turn = 1;
         public Grid(Point position,int rows,int columns,int slotWidth,int slotHeight):this(position,rows,columns,slotWidth,slotHeight,-1)
         {
         }
@@ -342,6 +343,7 @@ namespace ShapeMatchingGame
                 Swap(ShapeSlots[from.Row, from.Column], ShapeSlots[to.Row, to.Column]);
                 ShapeSlots[from.Row, from.Column].RecentlySwappedTo = true;
                 ShapeSlots[to.Row, to.Column].RecentlySwappedTo = true;
+                Turn++;
                 return true;
             }
             return false;

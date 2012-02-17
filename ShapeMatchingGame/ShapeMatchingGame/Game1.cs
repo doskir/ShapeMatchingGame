@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -63,6 +64,7 @@ namespace ShapeMatchingGame
 
         private MouseState _previousMouseState;
         private KeyboardState _previousKeyboardState;
+        private bool playAlone = false;
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -94,14 +96,28 @@ namespace ShapeMatchingGame
 
             if (currentKeyboardState.IsKeyDown(Keys.B) && _previousKeyboardState.IsKeyUp(Keys.B))
             {
-                MoveFinder.IMoveFinder moveFinder = new SimpleMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_grid.ShapeSlotsToArray(), 1);
-                if (bestMove == null)
-                    throw new Exception("No moves left.");
-                _grid.DoMove(bestMove.From, bestMove.To);
-
+                playAlone = !playAlone;
             }
-
+            if(playAlone && _grid.MovesAllowed)
+            {
+                MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
+                Move bestMove = moveFinder.GetBestMove(_grid.ShapeSlotsToArray(), 2);
+                if (bestMove == null)
+                {
+                    Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _grid.Turn, _grid.Score);
+                    _grid = new Grid(new Point(20, 20), 8, 8, 50, 50);
+                }
+                else
+                {
+                    int predictedScore = _grid.Score + bestMove.PredictedScore;
+                    _grid.DoMove(bestMove.From, bestMove.To);
+                    if (predictedScore < _grid.Score)
+                    {
+                        Debug.WriteLine("predicted score was too high");
+                    }
+                }
+            }
+            
 
             _previousKeyboardState = currentKeyboardState;
             _previousMouseState = currentMouseState;
