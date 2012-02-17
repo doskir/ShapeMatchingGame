@@ -110,6 +110,7 @@
   <ItemGroup>
     <Compile Include="Globals.cs" />
     <Compile Include="Grid.cs" />
+    <Compile Include="GridModel.cs" />
     <Compile Include="Helpers\GridHelpers.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Move.cs" />

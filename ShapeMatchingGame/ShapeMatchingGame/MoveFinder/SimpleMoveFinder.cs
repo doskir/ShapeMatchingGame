@@ -26,5 +26,10 @@ namespace ShapeMatchingGame.MoveFinder
             Move bestMove = validMoves.OrderBy(mv => mv.PredictedScore).LastOrDefault();
             return bestMove;
         }
+
+        public Move GetBestMove(GridModel gridModel, int movesToLookAhead)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

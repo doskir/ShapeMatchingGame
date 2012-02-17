@@ -101,7 +101,7 @@ namespace ShapeMatchingGame
             if(playAlone && _grid.MovesAllowed)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_grid.ShapeSlotsToArray(), 2);
+                Move bestMove = moveFinder.GetBestMove(_grid.ToGridModel(), 3);
                 if (bestMove == null)
                 {
                     Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _grid.Turn, _grid.Score);

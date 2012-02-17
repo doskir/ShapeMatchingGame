@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShapeMatchingGame
 {
-    class Shape : DrawableObject,ICloneable
+    class Shape : DrawableObject
     {
         public ShapeColor Color;
         public ShapeType Type;
@@ -121,7 +121,7 @@ namespace ShapeMatchingGame
             }
         }
 
-        public object Clone()
+        public object DeepCopy()
         {
             Shape newShape = new Shape(Color, Type);
             newShape.Moving = Moving;

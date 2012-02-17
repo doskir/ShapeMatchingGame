@@ -134,6 +134,11 @@ namespace ShapeMatchingGame
             }
             return shapeArray;
         }
+        public GridModel ToGridModel()
+        {
+            GridModel gridModel = new GridModel(ShapeSlotsToArray());
+            return gridModel;
+        }
         public bool HandleMatches()
         {
             bool foundMatch = false;
