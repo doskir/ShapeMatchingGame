@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame
 {
@@ -16,11 +17,11 @@ namespace ShapeMatchingGame
                 rand = new Random(seed);
         }
 
-        public Shape GetNextShape(ShapeType type)
+        public Shape.ShapeViewDrawable GetNextShape(ShapeType type)
         {
-            Shape shape = new Shape(ShapeColor.None, type);
-            shape.Color = (ShapeColor) rand.Next(7);
-            return shape;
+            Shape.ShapeViewDrawable shapeViewDrawable = new Shape.ShapeViewDrawable(ShapeColor.None, type);
+            shapeViewDrawable.Color = (ShapeColor) rand.Next(7);
+            return shapeViewDrawable;
         }
 
     }

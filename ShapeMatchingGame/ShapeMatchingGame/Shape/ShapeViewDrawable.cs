@@ -1,20 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ShapeMatchingGame
+namespace ShapeMatchingGame.Shape
 {
-    class Shape : DrawableObject
+    class ShapeViewDrawable : DrawableObject
     {
-        public ShapeColor Color;
-        public ShapeType Type;
-        public Shape(ShapeColor color,ShapeType type):this(color,type,new Rectangle(0,-50,50,50))
+        private ShapeModel _shape = ShapeModel.Empty.DeepCopy();
+
+        public ShapeColor Color
+        {
+            get { return _shape.Color; }
+            set { _shape.Color = value; }
+        }
+        public ShapeType Type
+        {
+            get { return _shape.Type; }
+            set { _shape.Type = value; }
+        }
+        
+        public ShapeViewDrawable(ShapeColor color,ShapeType type):this(color,type,new Rectangle(0,-50,50,50))
         {
         }
-        public Shape(ShapeColor color,ShapeType type,Rectangle creationRectangle)
+        public ShapeViewDrawable(ShapeColor color,ShapeType type,Rectangle creationRectangle)
         {
             Color = color;
             Type = type;
@@ -25,7 +32,7 @@ namespace ShapeMatchingGame
             get { return Type == ShapeType.None && Color == ShapeColor.None; }
         }
 
-        public static readonly Shape Empty = new Shape(ShapeColor.None, ShapeType.None);
+        public static readonly ShapeViewDrawable Empty = new ShapeViewDrawable(ShapeColor.None, ShapeType.None);
         private Rectangle _targetRectangle = Rectangle.Empty;
         private Vector2 _moveSpeed;
         public bool Moving;
@@ -123,31 +130,13 @@ namespace ShapeMatchingGame
 
         public object DeepCopy()
         {
-            Shape newShape = new Shape(Color, Type);
-            newShape.Moving = Moving;
-            newShape.RecentlyDropped = true;
-            newShape.RecentlySwapped = true;
-            newShape._moveSpeed = _moveSpeed;
-            newShape._targetRectangle = _targetRectangle;
-            return newShape;
+            ShapeViewDrawable newShapeViewDrawable = new ShapeViewDrawable(Color, Type);
+            newShapeViewDrawable.Moving = Moving;
+            newShapeViewDrawable.RecentlyDropped = true;
+            newShapeViewDrawable.RecentlySwapped = true;
+            newShapeViewDrawable._moveSpeed = _moveSpeed;
+            newShapeViewDrawable._targetRectangle = _targetRectangle;
+            return newShapeViewDrawable;
         }
-    }
-
-    public enum ShapeColor
-    {
-        Blue = 0,
-        Green = 1,
-        Orange = 2,
-        Red = 3,
-        Violet = 4,
-        White = 5,
-        Yellow = 6,
-        None
-        
-    }
-
-    public enum ShapeType
-    {
-        None,Normal,Blast,Cross,Star
     }
 }

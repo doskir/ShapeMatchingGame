@@ -123,7 +123,8 @@
     <Compile Include="Game1.cs" />
     <Compile Include="DrawableObject.cs" />
     <Compile Include="RandomShapeGenerator.cs" />
-    <Compile Include="Shape.cs" />
+    <Compile Include="Shape\ShapeViewDrawable.cs" />
+    <Compile Include="Shape\ShapeModel.cs" />
     <Compile Include="ShapeSlot.cs" />
     <Compile Include="Utility\ShapeDrawer.cs" />
   </ItemGroup>

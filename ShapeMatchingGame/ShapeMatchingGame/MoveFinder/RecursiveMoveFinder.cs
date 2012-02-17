@@ -8,17 +8,17 @@ namespace ShapeMatchingGame.MoveFinder
 {
     class RecursiveMoveFinder : IMoveFinder
     {
-        public Move GetBestMove(Shape[,] shapes, int movesToLookAhead)
+        public Move GetBestMove(Shape.ShapeViewDrawable[,] shapesViewDrawable, int movesToLookAhead)
         {
             if (movesToLookAhead < 1)
                 return new Move(new Position(-1, -1), new Position(-1, -1));
-            int rows = shapes.GetLength(0);
-            int columns = shapes.GetLength(1);
-            List<Move> validMoves = Helpers.GridHelpers.GetValidMoves(shapes);
+            int rows = shapesViewDrawable.GetLength(0);
+            int columns = shapesViewDrawable.GetLength(1);
+            List<Move> validMoves = Helpers.GridHelpers.GetValidMoves(shapesViewDrawable);
             foreach (Move move in validMoves)
             {
                 //apply the swap to the grid
-                Shape[,] newGrid = Helpers.GridHelpers.DoMove(shapes, move);
+                Shape.ShapeViewDrawable[,] newGrid = Helpers.GridHelpers.DoMove(shapesViewDrawable, move);
                 //do the whole matching stuff on it
                 int score;
                 newGrid = Helpers.GridHelpers.HandleMatches(newGrid, out score);
