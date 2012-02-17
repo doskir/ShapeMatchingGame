@@ -96,8 +96,10 @@ namespace ShapeMatchingGame
             {
                 MoveFinder.IMoveFinder moveFinder = new SimpleMoveFinder();
                 Move bestMove = moveFinder.GetBestMove(_grid.ShapeSlotsToArray(), 1);
-                if (bestMove != null)
-                    _grid.DoMove(bestMove.From, bestMove.To);
+                if (bestMove == null)
+                    throw new Exception("No moves left.");
+                _grid.DoMove(bestMove.From, bestMove.To);
+
             }
 
 

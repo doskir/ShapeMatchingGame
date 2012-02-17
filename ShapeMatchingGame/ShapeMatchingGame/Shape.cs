@@ -20,6 +20,10 @@ namespace ShapeMatchingGame
             Type = type;
             Rectangle = creationRectangle;
         }
+        public bool IsEmpty
+        {
+            get { return Type == ShapeType.None && Color == ShapeColor.None; }
+        }
 
         public static readonly Shape Empty = new Shape(ShapeColor.None, ShapeType.None);
         private Rectangle _targetRectangle = Rectangle.Empty;

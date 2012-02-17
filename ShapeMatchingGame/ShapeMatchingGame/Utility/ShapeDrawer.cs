@@ -27,6 +27,7 @@ namespace ShapeMatchingGame.Utility
             Graphics g = Graphics.FromImage(bmp);
             g.FillPolygon(new SolidBrush(color), points.ToArray());
             bmp.Save(name + ".png");
+            bmp.Dispose();
         }
         public void DrawShape(string name, int edges, Color color,int additionalRotationInDegrees)
         {
