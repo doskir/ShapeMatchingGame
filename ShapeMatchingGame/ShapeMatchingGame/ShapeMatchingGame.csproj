@@ -109,9 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Globals.cs" />
-    <Compile Include="Grid.cs" />
-    <Compile Include="GridModel.cs" />
-    <Compile Include="Helpers\GridHelpers.cs" />
+    <Compile Include="Grid\GridViewDrawable.cs" />
+    <Compile Include="Grid\GridModel.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="MoveFinder\IMoveFinder.cs" />

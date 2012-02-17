@@ -8,35 +8,6 @@ namespace ShapeMatchingGame.MoveFinder
 {
     class RecursiveMoveFinder : IMoveFinder
     {
-        public Move GetBestMove(Shape.ShapeViewDrawable[,] shapesViewDrawable, int movesToLookAhead)
-        {
-            if (movesToLookAhead < 1)
-                return new Move(new Position(-1, -1), new Position(-1, -1));
-            int rows = shapesViewDrawable.GetLength(0);
-            int columns = shapesViewDrawable.GetLength(1);
-            List<Move> validMoves = Helpers.GridHelpers.GetValidMoves(shapesViewDrawable);
-            foreach (Move move in validMoves)
-            {
-                //apply the swap to the grid
-                Shape.ShapeViewDrawable[,] newGrid = Helpers.GridHelpers.DoMove(shapesViewDrawable, move);
-                //do the whole matching stuff on it
-                int score;
-                newGrid = Helpers.GridHelpers.HandleMatches(newGrid, out score);
-                move.PredictedScore = score;
-                Move bestNextMove = GetBestMove(newGrid, movesToLookAhead - 1);
-                if(bestNextMove == null)
-                {
-                    //no valid moves left
-                }
-                else
-                {
-                    move.PredictedScore += bestNextMove.PredictedScore;
-                }
-            }
-            Move bestMove = validMoves.OrderBy(mv => mv.PredictedScore).LastOrDefault();
-            return bestMove;
-        }
-
         public Move GetBestMove(GridModel gridModel, int movesToLookAhead)
         {
             if (movesToLookAhead < 1)

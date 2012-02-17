@@ -8,8 +8,9 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame
 {
-    class Grid : DrawableObject
+    class GridViewDrawable : DrawableObject
     {
+        private GridModel _gridModel;
         public ShapeSlot[,] ShapeSlots;
         private int _rows;
         private int _columns;
@@ -17,11 +18,12 @@ namespace ShapeMatchingGame
         private ShapeSlot _currentlyHighlightedShapeSlot;
         public int Score;
         public int Turn = 1;
-        public Grid(Point position,int rows,int columns,int slotWidth,int slotHeight):this(position,rows,columns,slotWidth,slotHeight,-1)
+        public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight):this(position,rows,columns,slotWidth,slotHeight,-1)
         {
         }
-        public Grid(Point position,int rows, int columns, int slotWidth, int slotHeight, int seed)
+        public GridViewDrawable(Point position,int rows, int columns, int slotWidth, int slotHeight, int seed)
         {
+            _gridModel = new GridModel(rows, columns);
             _rows = rows;
             _columns = columns;
             ShapeSlots = new ShapeSlot[rows,columns];
@@ -123,14 +125,14 @@ namespace ShapeMatchingGame
                 } while (shapeDropped);
             } 
         }
-        public Shape.ShapeViewDrawable[,] ShapeSlotsToArray()
+        public Shape.ShapeModel[,] ShapeSlotsToArray()
         {
-            Shape.ShapeViewDrawable[,] shapeViewDrawableArray = new Shape.ShapeViewDrawable[_rows,_columns];
+            Shape.ShapeModel[,] shapeViewDrawableArray = new Shape.ShapeModel[_rows,_columns];
             for(int row = 0;row < _rows;row++)
             {
                 for(int column = 0;column < _columns;column++)
                 {
-                    shapeViewDrawableArray[row, column] = ShapeSlots[row, column].ShapeViewDrawable;
+                    shapeViewDrawableArray[row, column] = ShapeSlots[row, column].ShapeViewDrawable.ShapeModel;
                 }
             }
             return shapeViewDrawableArray;
@@ -143,7 +145,7 @@ namespace ShapeMatchingGame
         public bool HandleMatches()
         {
             bool foundMatch = false;
-            Shape.ShapeViewDrawable[,] shapeViewDrawableArray = ShapeSlotsToArray();
+            Shape.ShapeModel[,] shapeViewDrawableArray = ShapeSlotsToArray();
             List<Match> matches = GetMatches(shapeViewDrawableArray);
             foreach(Match match in matches)
             {
@@ -186,7 +188,7 @@ namespace ShapeMatchingGame
             }
             return foundMatch;
         }
-        List<Match> GetMatches(Shape.ShapeViewDrawable[,] shapeViewDrawableArray)
+        List<Match> GetMatches(ShapeModel[,] shapeViewDrawableArray)
         {
             List<Match> matches = new List<Match>();
             for (int originRow = 0; originRow < _rows;originRow++)
@@ -213,7 +215,7 @@ namespace ShapeMatchingGame
             }
             return matches;
         }
-        Match GetMatchAtPosition(Shape.ShapeViewDrawable[,] shapeViewDrawableArray,Position position)
+        Match GetMatchAtPosition(ShapeModel[,] shapeViewDrawableArray,Position position)
         {
             ShapeColor myColor = shapeViewDrawableArray[position.Row, position.Column].Color;
             if(myColor == ShapeColor.None)
@@ -302,12 +304,12 @@ namespace ShapeMatchingGame
         {
             if (!IsPossibleMove(from, to))
                 return false;
-            Shape.ShapeViewDrawable[,] shapesViewDrawable = ShapeSlotsToArray();
+            Shape.ShapeModel[,] shapes = ShapeSlotsToArray();
             //swap the shapes
-            Shape.ShapeViewDrawable temp = shapesViewDrawable[from.Row, from.Column];
-            shapesViewDrawable[from.Row, from.Column] = shapesViewDrawable[to.Row, to.Column];
-            shapesViewDrawable[to.Row, to.Column] = temp;
-            if (GetMatchAtPosition(shapesViewDrawable, to).IsValid || GetMatchAtPosition(shapesViewDrawable, from).IsValid)
+            Shape.ShapeModel temp = shapes[from.Row, from.Column];
+            shapes[from.Row, from.Column] = shapes[to.Row, to.Column];
+            shapes[to.Row, to.Column] = temp;
+            if (GetMatchAtPosition(shapes, to).IsValid || GetMatchAtPosition(shapes, from).IsValid)
             {
                 return true;
             }

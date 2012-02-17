@@ -5,17 +5,17 @@ namespace ShapeMatchingGame.Shape
 {
     class ShapeViewDrawable : DrawableObject
     {
-        private ShapeModel _shape = ShapeModel.Empty.DeepCopy();
+        public ShapeModel ShapeModel = ShapeModel.Empty.DeepCopy();
 
         public ShapeColor Color
         {
-            get { return _shape.Color; }
-            set { _shape.Color = value; }
+            get { return ShapeModel.Color; }
+            set { ShapeModel.Color = value; }
         }
         public ShapeType Type
         {
-            get { return _shape.Type; }
-            set { _shape.Type = value; }
+            get { return ShapeModel.Type; }
+            set { ShapeModel.Type = value; }
         }
         
         public ShapeViewDrawable(ShapeColor color,ShapeType type):this(color,type,new Rectangle(0,-50,50,50))

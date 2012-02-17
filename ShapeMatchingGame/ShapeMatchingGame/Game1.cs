@@ -49,7 +49,7 @@ namespace ShapeMatchingGame
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Globals.Content = Content;
             _spriteFont = Content.Load<SpriteFont>("SpriteFont1");
-            _grid = new Grid(new Point(20, 20), 8, 8, 50, 50);
+            _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
             // TODO: use this.Content to load your game content here
         }
 
@@ -80,17 +80,17 @@ namespace ShapeMatchingGame
             if(currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
-                if(_grid.Rectangle.Contains(cursorPosition))
+                if(_gridViewDrawable.Rectangle.Contains(cursorPosition))
                 {
-                    _grid.Clicked(cursorPosition);
+                    _gridViewDrawable.Clicked(cursorPosition);
                 }
             }
             if(currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
-                if (_grid.Rectangle.Contains(cursorPosition))
+                if (_gridViewDrawable.Rectangle.Contains(cursorPosition))
                 {
-                    _grid.DebugFunctionAt(cursorPosition);
+                    _gridViewDrawable.DebugFunctionAt(cursorPosition);
                 }
             }
 
@@ -98,20 +98,20 @@ namespace ShapeMatchingGame
             {
                 playAlone = !playAlone;
             }
-            if(playAlone && _grid.MovesAllowed)
+            if(playAlone && _gridViewDrawable.MovesAllowed)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_grid.ToGridModel(), 3);
+                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 3);
                 if (bestMove == null)
                 {
-                    Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _grid.Turn, _grid.Score);
-                    _grid = new Grid(new Point(20, 20), 8, 8, 50, 50);
+                    Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn, _gridViewDrawable.Score);
+                    _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
                 }
                 else
                 {
-                    int predictedScore = _grid.Score + bestMove.PredictedScore;
-                    _grid.DoMove(bestMove.From, bestMove.To);
-                    if (predictedScore < _grid.Score)
+                    int predictedScore = _gridViewDrawable.Score + bestMove.PredictedScore;
+                    _gridViewDrawable.DoMove(bestMove.From, bestMove.To);
+                    if (predictedScore < _gridViewDrawable.Score)
                     {
                         Debug.WriteLine("predicted score was too high");
                     }
@@ -122,14 +122,14 @@ namespace ShapeMatchingGame
             _previousKeyboardState = currentKeyboardState;
             _previousMouseState = currentMouseState;
 
-            _grid.Update();
+            _gridViewDrawable.Update();
 
             // TODO: Add your update logic here
 
             base.Update(gameTime);
         }
 
-        private Grid _grid;
+        private GridViewDrawable _gridViewDrawable;
         private SpriteFont _spriteFont;
         /// <summary>
         /// This is called when the game should draw itself.
@@ -139,8 +139,8 @@ namespace ShapeMatchingGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-            _grid.Draw(spriteBatch);
-            string scoreString = "Score: " + _grid.Score;
+            _gridViewDrawable.Draw(spriteBatch);
+            string scoreString = "Score: " + _gridViewDrawable.Score;
             float width = _spriteFont.MeasureString(scoreString).X;
             Vector2 textPosition = new Vector2(graphics.GraphicsDevice.Viewport.Width, 20);
             textPosition.X -= width;
