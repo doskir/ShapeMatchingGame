@@ -66,6 +66,7 @@ namespace ShapeMatchingGame
         private MouseState _previousMouseState;
         private KeyboardState _previousKeyboardState;
         private bool playAlone = false;
+        private TimeSpan _lastMoveTotalGameTime = TimeSpan.MinValue;
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -99,7 +100,7 @@ namespace ShapeMatchingGame
             {
                 playAlone = !playAlone;
             }
-            if (playAlone && _gridViewDrawable.MovesAllowed)
+            if (playAlone && _gridViewDrawable.MovesAllowed && (gameTime.TotalGameTime - _lastMoveTotalGameTime).TotalMilliseconds >= 1000)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
                 Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 3);
@@ -118,6 +119,7 @@ namespace ShapeMatchingGame
                         //Debug.WriteLine("predicted score was too high");
                     }
                 }
+                _lastMoveTotalGameTime = gameTime.TotalGameTime;
             }
 
 

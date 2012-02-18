@@ -18,8 +18,9 @@ namespace ShapeMatchingGame.MoveFinder
                 GridModel tempGridModel = gridModel.DeepCopy();
                 tempGridModel.DoMove(move);
                 //do the whole matching stuff on it
+                
                 int score;
-                tempGridModel.HandleMatches(out score);
+                tempGridModel.FinishTurn(out score);
                 move.PredictedScore = score;
                 if (movesToLookAhead - 1 < 1)
                     continue;

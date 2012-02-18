@@ -14,7 +14,10 @@ namespace ShapeMatchingGame.Grid
         private int _columns;
         private ShapeSlot _currentlyHighlightedShapeSlot;
         public int Score;
-        public int Turn = 1;
+        public int Turn
+        {
+            get { return _gridModel.Turn; }
+        }
         public Rectangle Rectangle;
         public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight)
         {
@@ -31,56 +34,22 @@ namespace ShapeMatchingGame.Grid
                 }
             }
             Rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
-
-            while (HasEmptyFields)
-            {
-                HandleMatches();
-                DropShapes();
-                FillGrid();
-            }
-
+            int addedScore;
+            _gridModel.FinishTurn(out addedScore);
         }
-        private bool HasEmptyFields
-        {
-            get
-            {
-                for (int row = 0; row < _rows; row++)
-                {
-                    for (int column = 0; column < _columns; column++)
-                    {
-                        if (_gridModel.Shapes[row, column].IsEmpty)
-                            return true;
-                    }
-                }
-                return false;
-            }
-        }
+
         public bool MovesAllowed
         {
-            get { return !HasEmptyFields; }
+            get { return !_gridModel.HasEmptyFields; }
         }
 
-        public void FillGrid()
-        {
-            _gridModel.FillGrid();
-        }
 
         public void Update()
         {
             foreach (ShapeSlot shapeSlot in ShapeSlots)
                 shapeSlot.Update();
-            do
-            {
-                HandleMatches();
-                DropShapes();
-                FillGrid();
-            } while (HasEmptyFields);
         }
 
-        public void DropShapes()
-        {
-            _gridModel.DropShapes();
-        }
         public ShapeView[,] ShapeSlotsToArray()
         {
             return _gridModel.Shapes;
@@ -89,17 +58,7 @@ namespace ShapeMatchingGame.Grid
         {
             return _gridModel;
         }
-        public void HandleMatches()
-        {
-            int gainedScore;
-            _gridModel.HandleMatches(out gainedScore);
-            Score += gainedScore;
-        }
 
-        public bool IsValidMove(Position from,Position to)
-        {
-            return _gridModel.IsValidMove(from, to);
-        }
         public Position GetShapeSlotPosition(ShapeSlot shapeSlot)
         {
             for (int row = 0; row < _rows; row++)
@@ -130,18 +89,21 @@ namespace ShapeMatchingGame.Grid
             }
         }
 
-        public bool DoMove(Position from,Position to)
+        public bool DoMove(Position from, Position to)
         {
             if (!MovesAllowed)
                 return false;
-            if (IsValidMove(from, to))
+            if (_gridModel.DoMove(new Move(from, to)))
             {
-                _gridModel.DoMove(new Move(from, to));
-                Turn++;
+                int addedScore;
+                _gridModel.FinishTurn(out addedScore);
+                Score += addedScore;
                 return true;
             }
+
             return false;
         }
+
         public void Clicked(Point position)
         {
             foreach(ShapeSlot slot in ShapeSlots)

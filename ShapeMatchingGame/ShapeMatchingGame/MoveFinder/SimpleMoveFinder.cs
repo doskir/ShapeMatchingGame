@@ -20,7 +20,7 @@ namespace ShapeMatchingGame.MoveFinder
                 tempGridModel.DoMove(move);
                 //do the whole matching stuff on it
                 int score;
-                tempGridModel.HandleMatches(out score);
+                tempGridModel.FinishTurn(out score);
                 move.PredictedScore = score;
             }
             Move bestMove = validMoves.OrderBy(mv => mv.PredictedScore).LastOrDefault();
