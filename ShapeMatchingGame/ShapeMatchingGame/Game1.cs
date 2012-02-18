@@ -102,7 +102,7 @@ namespace ShapeMatchingGame
             if(playAlone && _gridViewDrawable.MovesAllowed)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 3);
+                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 2);
                 if (bestMove == null)
                 {
                     Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn, _gridViewDrawable.Score);
@@ -112,7 +112,7 @@ namespace ShapeMatchingGame
                 {
                     int predictedScore = _gridViewDrawable.Score + bestMove.PredictedScore;
                     _gridViewDrawable.DoMove(bestMove.From, bestMove.To);
-                    if (predictedScore < _gridViewDrawable.Score)
+                    if (predictedScore > _gridViewDrawable.Score)
                     {
                         Debug.WriteLine("predicted score was too high");
                     }

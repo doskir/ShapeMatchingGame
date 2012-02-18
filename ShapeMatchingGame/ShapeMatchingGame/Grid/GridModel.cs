@@ -53,19 +53,14 @@ namespace ShapeMatchingGame
             int rows = Shapes.GetLength(0);
             int columns = Shapes.GetLength(1);
             List<Move> moves = new List<Move>();
-            for (int row = 0; row < rows; row++)
+            for (int row = 0; row < rows -1; row++)
             {
-                for (int column = 0; column < columns; column++)
+                for (int column = 0; column < columns - 1; column++)
                 {
                     Position from = new Position(row, column);
-                    if (column > 0)
-                        moves.Add(new Move(from, new Position(from.Row, from.Column - 1)));
-                    if (column < columns - 1)
-                        moves.Add(new Move(from, new Position(from.Row, from.Column + 1)));
-                    if (row > 0)
-                        moves.Add(new Move(from, new Position(from.Row - 1, from.Column)));
-                    if (row < rows - 1)
-                        moves.Add(new Move(from, new Position(from.Row + 1, from.Column)));
+                    //only allow moving down and to the right, moving left or up are just mirror moves
+                    moves.Add(new Move(from, new Position(from.Row, from.Column + 1)));
+                    moves.Add(new Move(from, new Position(from.Row + 1, from.Column)));
                 }
             }
             return moves;
@@ -367,7 +362,7 @@ namespace ShapeMatchingGame
                 for (int column = 0; column < cloned.GetLength(1); column++)
                 {
                     //shapeviews do not allow changing of the color or type of a shape
-                    cloned[row, column] = Shapes[row, column];
+                    cloned[row, column] = new ShapeView(Shapes[row, column].ShapeColor, Shapes[row, column].ShapeType);
                 }
             }
             return cloned;

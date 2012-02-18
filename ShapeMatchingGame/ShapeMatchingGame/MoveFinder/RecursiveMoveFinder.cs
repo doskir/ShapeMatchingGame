@@ -11,7 +11,7 @@ namespace ShapeMatchingGame.MoveFinder
         public Move GetBestMove(GridModel gridModel, int movesToLookAhead)
         {
             if (movesToLookAhead < 1)
-                return new Move(new Position(-1, -1), new Position(-1, -1));
+                throw new Exception();
             List<Move> validMoves = gridModel.GetValidMoves();
             foreach (Move move in validMoves)
             {
@@ -21,6 +21,8 @@ namespace ShapeMatchingGame.MoveFinder
                 int score;
                 tempGridModel.HandleMatches(out score);
                 move.PredictedScore = score;
+                if (movesToLookAhead - 1 < 1)
+                    continue;
                 Move bestNextMove = GetBestMove(gridModel, movesToLookAhead - 1);
                 if (bestNextMove == null)
                 {
