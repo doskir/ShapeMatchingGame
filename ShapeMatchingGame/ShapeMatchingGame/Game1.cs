@@ -99,13 +99,14 @@ namespace ShapeMatchingGame
             {
                 playAlone = !playAlone;
             }
-            if(playAlone && _gridViewDrawable.MovesAllowed)
+            if (playAlone && _gridViewDrawable.MovesAllowed)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 2);
+                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 3);
                 if (bestMove == null)
                 {
-                    Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn, _gridViewDrawable.Score);
+                    Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn,
+                                    _gridViewDrawable.Score);
                     _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
                 }
                 else
@@ -114,11 +115,11 @@ namespace ShapeMatchingGame
                     _gridViewDrawable.DoMove(bestMove.From, bestMove.To);
                     if (predictedScore > _gridViewDrawable.Score)
                     {
-                        Debug.WriteLine("predicted score was too high");
+                        //Debug.WriteLine("predicted score was too high");
                     }
                 }
             }
-            
+
 
             _previousKeyboardState = currentKeyboardState;
             _previousMouseState = currentMouseState;

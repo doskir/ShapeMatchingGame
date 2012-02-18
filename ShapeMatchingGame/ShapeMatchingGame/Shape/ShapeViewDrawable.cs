@@ -6,13 +6,16 @@ namespace ShapeMatchingGame.Shape
     class ShapeViewDrawable : ShapeView,IDrawableObject
     {
         public Rectangle Rectangle;
-        public Texture2D Texture;
         public ShapeViewDrawable(ShapeColor color,ShapeType type):this(color,type,new Rectangle(0,-50,50,50))
         {
         }
         public ShapeViewDrawable(ShapeColor color,ShapeType type,Rectangle creationRectangle):base(color,type)
         {
             Rectangle = creationRectangle;
+        }
+        public ShapeViewDrawable(ShapeView shapeView):this(shapeView.ShapeColor,shapeView.ShapeType,new Rectangle(0,0,50,50))
+        {
+            
         }
 
         public static readonly ShapeViewDrawable Empty = new ShapeViewDrawable(ShapeColor.None, ShapeType.None);

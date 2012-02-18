@@ -19,29 +19,45 @@ namespace ShapeMatchingGame.Grid
         public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight)
         {
             _gridModel = new GridModel(rows, columns);
+            _rows = _gridModel.Rows;
+            _columns = _gridModel.Columns;
             ShapeSlots = new ShapeSlot[rows, columns];
             for (int row = 0; row < rows; row++)
             {
                 for (int column = 0; column < columns; column++)
                 {
-                    ShapeSlots[row, column] =
-                        new ShapeSlot(new Rectangle(column * slotWidth + Rectangle.X, row * slotHeight + Rectangle.Y,
+                    ShapeSlots[row, column] = new ShapeSlot(new Rectangle(column * slotWidth + Rectangle.X, row * slotHeight + Rectangle.Y,
                                                     slotWidth, slotHeight));
                 }
             }
             Rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
-            FillGrid();
-        }
 
-        public bool MovesAllowed
+            while (HasEmptyFields)
+            {
+                HandleMatches();
+                DropShapes();
+                FillGrid();
+            }
+
+        }
+        private bool HasEmptyFields
         {
             get
             {
-                foreach (ShapeSlot shapeSlot in ShapeSlots)
-                    if (shapeSlot.ShapeViewDrawable.Moving)
-                        return false;
-                return true;
+                for (int row = 0; row < _rows; row++)
+                {
+                    for (int column = 0; column < _columns; column++)
+                    {
+                        if (_gridModel.Shapes[row, column].IsEmpty)
+                            return true;
+                    }
+                }
+                return false;
             }
+        }
+        public bool MovesAllowed
+        {
+            get { return !HasEmptyFields; }
         }
 
         public void FillGrid()
@@ -53,11 +69,12 @@ namespace ShapeMatchingGame.Grid
         {
             foreach (ShapeSlot shapeSlot in ShapeSlots)
                 shapeSlot.Update();
-            if (!MovesAllowed)
-                return;
-            HandleMatches();
-            DropShapes();
-            FillGrid();
+            do
+            {
+                HandleMatches();
+                DropShapes();
+                FillGrid();
+            } while (HasEmptyFields);
         }
 
         public void DropShapes()
@@ -67,21 +84,10 @@ namespace ShapeMatchingGame.Grid
         public ShapeView[,] ShapeSlotsToArray()
         {
             return _gridModel.Shapes;
-            ShapeView[,] shapeViewDrawableArray = new ShapeView[_rows,_columns];
-            for(int row = 0;row < _rows;row++)
-            {
-                for(int column = 0;column < _columns;column++)
-                {
-                    shapeViewDrawableArray[row, column] = ShapeSlots[row, column].ShapeViewDrawable;
-                }
-            }
-            return shapeViewDrawableArray;
         }
         public GridModel ToGridModel()
         {
             return _gridModel;
-            GridModel gridModel = new GridModel(ShapeSlotsToArray());
-            return gridModel;
         }
         public void HandleMatches()
         {
@@ -111,11 +117,19 @@ namespace ShapeMatchingGame.Grid
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach(ShapeSlot shapeSlot in ShapeSlots)
+            for (int row = 0; row < _rows; row++)
             {
-                shapeSlot.Draw(spriteBatch);
+                for (int column = 0; column < _columns; column++)
+                {
+                    ShapeSlots[row, column].Draw(spriteBatch);
+                    ShapeViewDrawable shapeViewDrawable = new ShapeViewDrawable(_gridModel.Shapes[row, column]);
+                    shapeViewDrawable.Rectangle = ShapeSlots[row, column].Rectangle;
+                    shapeViewDrawable.Draw(spriteBatch);
+
+                }
             }
         }
+
         public bool DoMove(Position from,Position to)
         {
             if (!MovesAllowed)
@@ -123,6 +137,7 @@ namespace ShapeMatchingGame.Grid
             if (IsValidMove(from, to))
             {
                 _gridModel.DoMove(new Move(from, to));
+                Turn++;
                 return true;
             }
             return false;
@@ -166,6 +181,7 @@ namespace ShapeMatchingGame.Grid
                 {
                     slot.ClearSlot();
                 }
+                
             }
         }
     }
