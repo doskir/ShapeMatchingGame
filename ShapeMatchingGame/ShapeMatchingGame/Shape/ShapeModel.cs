@@ -2,23 +2,32 @@
 {
     class ShapeModel
     {
-        public ShapeColor Color;
-        public ShapeType Type;
+        readonly ShapeColor _color;
+        public ShapeColor GetShapeColor()
+        {
+            return _color;
+        }
+
+        readonly ShapeType _type;
+        public ShapeType GetShapeType()
+        {
+            return _type;
+        }
         public ShapeModel(ShapeColor color,ShapeType type)
         {
-            Color = color;
-            Type = type;
+            _color = color;
+            _type = type;
         }
         public bool IsEmpty
         {
-            get { return Type == ShapeType.None && Color == ShapeColor.None; }
+            get { return _type == ShapeType.None && _color == ShapeColor.None; }
         }
         public static readonly ShapeModel Empty = new ShapeModel(ShapeColor.None, ShapeType.None);
         public bool RecentlySwapped;
         public bool RecentlyDropped;
         public ShapeModel DeepCopy()
         {
-            ShapeModel newShape = new ShapeModel(Color, Type);
+            ShapeModel newShape = new ShapeModel(_color, _type);
             return newShape;
         }
     }

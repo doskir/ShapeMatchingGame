@@ -93,7 +93,9 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml">
       <Private>False</Private>
     </Reference>
@@ -122,6 +124,7 @@
     <Compile Include="Game1.cs" />
     <Compile Include="DrawableObject.cs" />
     <Compile Include="RandomShapeGenerator.cs" />
+    <Compile Include="Shape\ShapeView.cs" />
     <Compile Include="Shape\ShapeViewDrawable.cs" />
     <Compile Include="Shape\ShapeModel.cs" />
     <Compile Include="ShapeSlot.cs" />

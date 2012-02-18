@@ -8,7 +8,7 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame
 {
-    internal class ShapeSlot : DrawableObject
+    internal class ShapeSlot : IDrawableObject
     {
         private Shape.ShapeViewDrawable _shapeViewDrawable;
 
@@ -21,7 +21,8 @@ namespace ShapeMatchingGame
                 _shapeViewDrawable.DropTo(Rectangle);
             }
         }
-
+        public Rectangle Rectangle;
+        public Texture2D Texture;
         public bool RecentlyDestroyed;
         public bool RecentlySwappedTo;
         public bool IsHighlighted;
@@ -35,10 +36,10 @@ namespace ShapeMatchingGame
 
         public bool IsEmpty
         {
-            get { return ShapeViewDrawable.Color == ShapeColor.None || ShapeViewDrawable.Type == ShapeType.None; }
+            get { return ShapeViewDrawable.IsEmpty; }
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch)
         {
             Rectangle renderingRectangle = new Rectangle(Rectangle.X, Rectangle.Y, Rectangle.Width,
                                                          Rectangle.Height);
@@ -56,14 +57,14 @@ namespace ShapeMatchingGame
             ShapeViewDrawable.Draw(spriteBatch);
         }
 
-        public override void Update()
+        public void Update()
         {
             ShapeViewDrawable.Update();
         }
 
         public void ClearSlot()
         {
-            ShapeViewDrawable = ShapeMatchingGame.Shape.ShapeViewDrawable.Empty;
+            ShapeViewDrawable = ShapeViewDrawable.Empty;
         }
 
         public void DestroyShape()

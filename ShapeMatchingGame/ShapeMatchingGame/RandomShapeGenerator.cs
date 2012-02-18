@@ -16,12 +16,28 @@ namespace ShapeMatchingGame
             else
                 rand = new Random(seed);
         }
-
-        public Shape.ShapeViewDrawable GetNextShape(ShapeType type)
+        public RandomShapeGenerator()
         {
-            Shape.ShapeViewDrawable shapeViewDrawable = new Shape.ShapeViewDrawable(ShapeColor.None, type);
-            shapeViewDrawable.Color = (ShapeColor) rand.Next(7);
+            rand = new Random();
+        }
+
+        public ShapeViewDrawable GetNextShapeViewDrawable(ShapeType type)
+        {
+            ShapeColor color = (ShapeColor) rand.Next(7);
+            Shape.ShapeViewDrawable shapeViewDrawable = new Shape.ShapeViewDrawable(color, type);
             return shapeViewDrawable;
+        }
+        public ShapeView GetNextShapeView(ShapeType type)
+        {
+            ShapeColor color = (ShapeColor) rand.Next(7);
+            ShapeView shapeView = new ShapeView(color, type);
+            return shapeView;
+        }
+        public ShapeModel GetNextShape(ShapeType type)
+        {
+            ShapeColor color = (ShapeColor)rand.Next(7);
+            Shape.ShapeModel shapeModel = new Shape.ShapeModel(color, type);
+            return shapeModel;
         }
 
     }

@@ -7,11 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShapeMatchingGame
 {
-    internal abstract class DrawableObject
+    interface IDrawableObject
     {
-        public Rectangle Rectangle;
-        public Texture2D Texture;
-        public abstract void Draw(SpriteBatch spriteBatch);
-        public abstract void Update();
+
+        void Draw(SpriteBatch spriteBatch);
+        void Update();
     }
 }
