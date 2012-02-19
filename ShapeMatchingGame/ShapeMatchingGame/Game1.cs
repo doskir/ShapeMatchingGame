@@ -66,7 +66,7 @@ namespace ShapeMatchingGame
         private MouseState _previousMouseState;
         private KeyboardState _previousKeyboardState;
         private bool playAlone = false;
-        private TimeSpan _lastMoveTotalGameTime = TimeSpan.MinValue;
+        private TimeSpan _lastMoveTotalGameTime = TimeSpan.Zero;
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.

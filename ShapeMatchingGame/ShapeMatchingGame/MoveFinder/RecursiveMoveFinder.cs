@@ -12,16 +12,13 @@ namespace ShapeMatchingGame.MoveFinder
         {
             if (movesToLookAhead < 1)
                 throw new Exception();
-            List<Move> validMoves = gridModel.GetValidMoves();
+            List<Move> validMoves = Helpers.GetValidMoves(gridModel);
             foreach (Move move in validMoves)
             {
                 GridModel tempGridModel = gridModel.DeepCopy();
                 tempGridModel.DoMove(move);
                 //do the whole matching stuff on it
-                
-                int score;
-                tempGridModel.FinishTurn(out score);
-                move.PredictedScore = score;
+                move.PredictedScore = tempGridModel.Score;
                 if (movesToLookAhead - 1 < 1)
                     continue;
                 Move bestNextMove = GetBestMove(gridModel, movesToLookAhead - 1);

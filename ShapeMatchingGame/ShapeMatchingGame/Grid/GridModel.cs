@@ -10,7 +10,8 @@ namespace ShapeMatchingGame
     {
         public ShapeView[,] Shapes;
         private RandomShapeGenerator _randomShapeGenerator = new RandomShapeGenerator();
-        public int Turn = 0;
+        public int Turn;
+        public int Score;
         public int Rows
         {
             get { return Shapes.GetLength(0); }
@@ -19,50 +20,12 @@ namespace ShapeMatchingGame
         {
             get { return Shapes.GetLength(1); }
         }
-        public GridModel(ShapeView[,] shapes)
+        public bool MovesAllowed
         {
-            Shapes = shapes;
+            get { return !HasEmptyFields; }
         }
-        public GridModel(int rows,int columns)
-        {
-            Shapes = new ShapeView[rows,columns];
-            for (int row = 0; row < rows; row++)
-                for (int column = 0; column < columns; column++)
-                    Shapes[row, column] = ShapeView.Empty;
-            
-        }
-        public GridModel(int rows,int columns,int seed):this(rows,columns)
-        {
-            _randomShapeGenerator = new RandomShapeGenerator(seed);
-        }
-        public List<Move> GetValidMoves()
-        {
-            List<Move> possibleMoves = GetPossibleMoves();
-            List<Move> validMoves = new List<Move>();
-            foreach (Move move in possibleMoves)
-            {
-                if (IsValidMove(move.From, move.To))
-                {
-                    validMoves.Add(move);
-                }
-            }
-            return validMoves;
-        }
-        public bool DoMove(Move move)
-        {
-            if (!IsValidMove(move.From, move.To))
-                return false;
-            foreach (ShapeView shapeView in Shapes)
-            {
-                shapeView.RecentlySwapped = false;
-                shapeView.RecentlyDropped = false;
-            }
-            Swap(move.From, move.To);
-            Shapes[move.From.Row, move.From.Column].RecentlySwapped = true;
-            Shapes[move.To.Row, move.To.Column].RecentlySwapped = true;
-            return true;
-        }
-        public bool HasEmptyFields
+
+        private bool HasEmptyFields
         {
             get
             {
@@ -77,40 +40,63 @@ namespace ShapeMatchingGame
                 return false;
             }
         }
-        public void FinishTurn(out int score)
+
+        public GridModel(ShapeView[,] shapes)
         {
-            do
+            Shapes = shapes;
+        }
+        public GridModel(int rows, int columns, int seed = 0)
+        {
+            if (seed != 0)
+                _randomShapeGenerator = new RandomShapeGenerator(seed);
+
+            Shapes = new ShapeView[rows,columns];
+            for (int row = 0; row < rows; row++)
+                for (int column = 0; column < columns; column++)
+                    Shapes[row, column] = ShapeView.Empty;
+            int addedScore;
+            FinishTurn(out addedScore);
+        }
+
+
+        public bool DoMove(Move move)
+        {
+            if (!IsValidMove(move.From, move.To))
+                return false;
+            foreach (ShapeView shapeView in Shapes)
             {
-                HandleMatches(out score);
-                DropShapes();
-                FillGrid();
-            } while (HasEmptyFields);
-            Turn++;
+                shapeView.RecentlySwapped = false;
+                shapeView.RecentlyDropped = false;
+            }
+            Swap(move.From, move.To);
+            Shapes[move.From.Row, move.From.Column].RecentlySwapped = true;
+            Shapes[move.To.Row, move.To.Column].RecentlySwapped = true;
+            int addedScore;
+            FinishTurn(out addedScore);
+            return true;
+        }
+
+        public bool IsValidMove(Position from, Position to)
+        {
+            bool isValid;
+            lock (Shapes)
+            {
+                if (!IsPossibleMove(from, to))
+                    return false;
+                if (Shapes[from.Row, from.Column].IsEmpty || Shapes[to.Row, to.Column].IsEmpty)
+                    return false;
+                Swap(from, to);
+                isValid = GetMatchAtPosition(to).IsValid
+                          || GetMatchAtPosition(from).IsValid;
+                //reverse the move
+                Swap(from, to);
+            }
+            return isValid;
         }
         public GridModel DeepCopy()
         {
             GridModel gridModel = new GridModel(DeepCopyShapes());
             return gridModel;
-        }
-
-
-
-        private List<Move> GetPossibleMoves()
-        {
-            int rows = Shapes.GetLength(0);
-            int columns = Shapes.GetLength(1);
-            List<Move> moves = new List<Move>();
-            for (int row = 0; row < rows - 1; row++)
-            {
-                for (int column = 0; column < columns - 1; column++)
-                {
-                    Position from = new Position(row, column);
-                    //only allow moving down and to the right, moving left or up are just mirror moves
-                    moves.Add(new Move(from, new Position(from.Row, from.Column + 1)));
-                    moves.Add(new Move(from, new Position(from.Row + 1, from.Column)));
-                }
-            }
-            return moves;
         }
         private bool IsPossibleMove(Position from, Position to)
         {
@@ -128,22 +114,15 @@ namespace ShapeMatchingGame
                 return true;
             return false;
         }
-        private bool IsValidMove(Position from, Position to)
+        private void FinishTurn(out int score)
         {
-            bool isValid;
-            lock (Shapes)
+            do
             {
-                if (!IsPossibleMove(from, to))
-                    return false;
-                if (Shapes[from.Row, from.Column].IsEmpty || Shapes[to.Row, to.Column].IsEmpty)
-                    return false;
-                Swap(from, to);
-                isValid = GetMatchAtPosition(to).IsValid
-                          || GetMatchAtPosition(from).IsValid;
-                //reverse the move
-                Swap(from, to);
-            }
-            return isValid;
+                HandleMatches(out score);
+                DropShapes();
+                FillGrid();
+            } while (HasEmptyFields);
+            Turn++;
         }
         private void Swap(Position from, Position to)
         {

@@ -115,6 +115,7 @@
     <Compile Include="Grid\GridModel.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Move.cs" />
+    <Compile Include="MoveFinder\Helpers.cs" />
     <Compile Include="MoveFinder\IMoveFinder.cs" />
     <Compile Include="MoveFinder\RecursiveMoveFinder.cs" />
     <Compile Include="MoveFinder\SimpleMoveFinder.cs" />
