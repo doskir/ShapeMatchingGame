@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using ShapeMatchingGame.Shape;
 
-namespace ShapeMatchingGame
+namespace ShapeMatchingGame.Grid
 {
-    class GridModel
+    class GridModel : IGridModel
     {
-        public ShapeView[,] Shapes;
-        private RandomShapeGenerator _randomShapeGenerator = new RandomShapeGenerator();
-        public int Turn;
-        public int Score;
+        //make private some day
+        public readonly ShapeView[,] Shapes;
+        private readonly RandomShapeGenerator _randomShapeGenerator = new RandomShapeGenerator();
+
+        public int Turn { get; private set; }
+
+        public int Score { get; private set; }
+
         public int Rows
         {
             get { return Shapes.GetLength(0); }
@@ -19,10 +23,6 @@ namespace ShapeMatchingGame
         public int Columns
         {
             get { return Shapes.GetLength(1); }
-        }
-        public bool MovesAllowed
-        {
-            get { return !HasEmptyFields; }
         }
 
         private bool HasEmptyFields
@@ -41,7 +41,7 @@ namespace ShapeMatchingGame
             }
         }
 
-        public GridModel(ShapeView[,] shapes)
+        private GridModel(ShapeView[,] shapes)
         {
             Shapes = shapes;
         }
@@ -56,6 +56,7 @@ namespace ShapeMatchingGame
                     Shapes[row, column] = ShapeView.Empty;
             int addedScore;
             FinishTurn(out addedScore);
+            Score += addedScore;
         }
 
 
@@ -73,9 +74,9 @@ namespace ShapeMatchingGame
             Shapes[move.To.Row, move.To.Column].RecentlySwapped = true;
             int addedScore;
             FinishTurn(out addedScore);
+            Score += addedScore;
             return true;
         }
-
         public bool IsValidMove(Position from, Position to)
         {
             bool isValid;
@@ -93,7 +94,7 @@ namespace ShapeMatchingGame
             }
             return isValid;
         }
-        public GridModel DeepCopy()
+        public GridModel CloneRawGrid()
         {
             GridModel gridModel = new GridModel(DeepCopyShapes());
             return gridModel;
@@ -221,7 +222,7 @@ namespace ShapeMatchingGame
             do
             {
                 foundMatch = false;
-                List<Match> matches = GetMatches();
+                IEnumerable<Match> matches = GetMatches();
                 foreach (Match match in matches)
                 {
                     if (match.IsValid)
@@ -345,7 +346,7 @@ namespace ShapeMatchingGame
                 score += 100;
             }
         }
-        private List<Match> GetMatches()
+        private IEnumerable<Match> GetMatches()
         {
             int rows = Shapes.GetLength(0);
             int columns = Shapes.GetLength(1);
@@ -357,16 +358,8 @@ namespace ShapeMatchingGame
                     Match match = GetMatchAtPosition(new Position(originRow, originColumn));
                     if (match.IsValid)
                     {
-                        bool duplicateMatch = false;
+                        bool duplicateMatch = matches.Any(existingMatch => existingMatch.InvolvedPositions.Contains(match.Center));
                         //prevent duplicate match adding
-                        foreach (Match existingMatch in matches)
-                        {
-                            if (existingMatch.InvolvedPositions.Contains(match.Center))
-                            {
-                                duplicateMatch = true;
-                                break;
-                            }
-                        }
                         if (!duplicateMatch)
                             matches.Add(match);
                     }
@@ -387,6 +380,5 @@ namespace ShapeMatchingGame
             }
             return cloned;
         }
-
     }
 }

@@ -100,10 +100,10 @@ namespace ShapeMatchingGame
             {
                 playAlone = !playAlone;
             }
-            if (playAlone && _gridViewDrawable.MovesAllowed && (gameTime.TotalGameTime - _lastMoveTotalGameTime).TotalMilliseconds >= 1000)
+            if (playAlone)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 3);
+                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 1);
                 if (bestMove == null)
                 {
                     Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn,

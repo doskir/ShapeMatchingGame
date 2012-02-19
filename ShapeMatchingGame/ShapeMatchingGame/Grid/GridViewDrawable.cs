@@ -8,7 +8,7 @@ namespace ShapeMatchingGame.Grid
 {
     class GridViewDrawable : IDrawableObject
     {
-        private GridModel _gridModel;
+        private GridModelProxy _gridModel;
         public ShapeSlot[,] ShapeSlots;
         private int _rows;
         private int _columns;
@@ -24,7 +24,7 @@ namespace ShapeMatchingGame.Grid
         public Rectangle Rectangle;
         public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight)
         {
-            _gridModel = new GridModel(rows, columns);
+            _gridModel = new GridModelProxy(rows, columns);
             _rows = _gridModel.Rows;
             _columns = _gridModel.Columns;
             ShapeSlots = new ShapeSlot[rows, columns];
@@ -39,11 +39,6 @@ namespace ShapeMatchingGame.Grid
             Rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
         }
 
-        public bool MovesAllowed
-        {
-            get { return _gridModel.MovesAllowed; }
-        }
-
 
         public void Update()
         {
@@ -51,13 +46,9 @@ namespace ShapeMatchingGame.Grid
                 shapeSlot.Update();
         }
 
-        public ShapeView[,] ShapeSlotsToArray()
-        {
-            return _gridModel.Shapes;
-        }
         public GridModel ToGridModel()
         {
-            return _gridModel;
+            return _gridModel.CloneRawGrid();
         }
 
         public Position GetShapeSlotPosition(ShapeSlot shapeSlot)
@@ -77,12 +68,13 @@ namespace ShapeMatchingGame.Grid
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            GridModel underlyingGridModel = _gridModel.CloneRawGrid();
             for (int row = 0; row < _rows; row++)
             {
                 for (int column = 0; column < _columns; column++)
                 {
                     ShapeSlots[row, column].Draw(spriteBatch);
-                    ShapeViewDrawable shapeViewDrawable = new ShapeViewDrawable(_gridModel.Shapes[row, column]);
+                    ShapeViewDrawable shapeViewDrawable = new ShapeViewDrawable(underlyingGridModel.Shapes[row, column]);
                     shapeViewDrawable.Rectangle = ShapeSlots[row, column].Rectangle;
                     shapeViewDrawable.Draw(spriteBatch);
 
@@ -92,8 +84,6 @@ namespace ShapeMatchingGame.Grid
 
         public bool DoMove(Position from, Position to)
         {
-            if (!MovesAllowed)
-                return false;
             return _gridModel.DoMove(new Move(from, to));
         }
 

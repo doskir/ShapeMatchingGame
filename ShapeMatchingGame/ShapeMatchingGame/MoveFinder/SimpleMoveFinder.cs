@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using ShapeMatchingGame.Grid;
 
 namespace ShapeMatchingGame.MoveFinder
 {
@@ -16,7 +17,7 @@ namespace ShapeMatchingGame.MoveFinder
             List<Move> validMoves = Helpers.GetValidMoves(gridModel);
             foreach (Move move in validMoves)
             {
-                GridModel tempGridModel = gridModel.DeepCopy();
+                GridModel tempGridModel = gridModel.CloneRawGrid();
                 tempGridModel.DoMove(move);
                 //do the whole matching stuff on it
                 move.PredictedScore = tempGridModel.Score;
