@@ -1,18 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame.Grid
 {
-    internal class GridModelProxy : IGridModel
+    internal class GridModelProxy<TShapeViewType> : IGridModel where TShapeViewType : IShapeView
     {
-        private readonly GridModel _gridModel;
+        private readonly GridModel<TShapeViewType> _gridModel;
 
         public bool DoMove(Move move)
         {
             return _gridModel.DoMove(move);
         }
 
-        public GridModel CloneRawGrid()
+        public GridModel<IShapeView> CloneRawGrid()
         {
             return _gridModel.CloneRawGrid();
         }
@@ -38,7 +39,7 @@ namespace ShapeMatchingGame.Grid
         }
         public GridModelProxy(int rows,int columns,int seed = 0)
         {
-            _gridModel = new GridModel(rows, columns, seed);
+            _gridModel = new GridModel<TShapeViewType>(rows, columns, seed);
         }
     }
 }

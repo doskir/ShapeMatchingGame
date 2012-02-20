@@ -61,14 +61,13 @@ namespace ShapeMatchingGame
         }
         public void AssignShape(IShapeView shapeView)
         {
-            if (shapeView.GetType() == typeof(ShapeViewDrawable))
+            if (shapeView is ShapeViewDrawable)
             {
                _shapeViewDrawable = (ShapeViewDrawable)shapeView;
             }
             else
             {
-                _shapeViewDrawable = new ShapeViewDrawable(shapeView.ShapeColor, shapeView.ShapeType,
-                                                           new Rectangle(Rectangle.X, -50, 50, 50));
+                _shapeViewDrawable = new ShapeViewDrawable(shapeView);
             }
         }
         public void Draw(SpriteBatch spriteBatch)

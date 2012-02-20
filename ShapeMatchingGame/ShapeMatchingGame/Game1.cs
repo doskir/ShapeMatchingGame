@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using ShapeMatchingGame.Grid;
 using ShapeMatchingGame.MoveFinder;
+using ShapeMatchingGame.Shape;
 using ShapeMatchingGame.Utility;
 
 namespace ShapeMatchingGame
@@ -26,6 +27,9 @@ namespace ShapeMatchingGame
             this.IsMouseVisible = true;
             graphics.PreferredBackBufferHeight = 850;
             Content.RootDirectory = "Content";
+
+
+
         }
 
         /// <summary>
@@ -47,11 +51,14 @@ namespace ShapeMatchingGame
         /// </summary>
         protected override void LoadContent()
         {
+            Globals.Content = Content;
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            Globals.Content = Content;
             _spriteFont = Content.Load<SpriteFont>("SpriteFont1");
             _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 16, 8, 50, 50);
+
+            ShapeSlot s1 = new ShapeSlot(new Rectangle(0, 0, 0, 0));
+            s1.AssignShape(new ShapeView(ShapeColor.Red, ShapeType.Normal));
             // TODO: use this.Content to load your game content here
         }
 

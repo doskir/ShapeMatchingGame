@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ShapeMatchingGame.Grid;
+using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame.MoveFinder
 {
     class Helpers
     {
-        public static List<Move> GetValidMoves(GridModel gridModel)
+        public static List<Move> GetValidMoves(GridModel<IShapeView> gridModel)
         {
             List<Move> possibleMoves = GetPossibleMoves(gridModel);
             List<Move> validMoves = new List<Move>();
@@ -21,7 +22,7 @@ namespace ShapeMatchingGame.MoveFinder
             }
             return validMoves;
         }
-        private static List<Move> GetPossibleMoves(GridModel gridModel)
+        private static List<Move> GetPossibleMoves(GridModel<IShapeView> gridModel)
         {
             int rows = gridModel.Rows;
             int columns = gridModel.Columns;

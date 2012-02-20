@@ -8,7 +8,7 @@ namespace ShapeMatchingGame.Grid
 {
     class GridViewDrawable : IDrawableObject
     {
-        private GridModelProxy _gridModel;
+        private GridModelProxy<ShapeViewDrawable> _gridModel;
         public ShapeSlot[,] ShapeSlots;
         private int _rows;
         private int _columns;
@@ -30,7 +30,7 @@ namespace ShapeMatchingGame.Grid
 
         public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight)
         {
-            _gridModel = new GridModelProxy(rows, columns);
+            _gridModel = new GridModelProxy<ShapeViewDrawable>(rows, columns);
             _rows = _gridModel.Rows;
             _columns = _gridModel.Columns;
             ShapeSlots = new ShapeSlot[rows, columns];
@@ -52,7 +52,7 @@ namespace ShapeMatchingGame.Grid
                 shapeSlot.Update();
         }
 
-        public GridModel ToGridModel()
+        public GridModel<IShapeView> ToGridModel()
         {
             return _gridModel.CloneRawGrid();
         }
@@ -80,7 +80,6 @@ namespace ShapeMatchingGame.Grid
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            GridModel underlyingGridModel = _gridModel.CloneRawGrid();
             for (int row = 0; row < _rows; row++)
             {
                 for (int column = 0; column < _columns; column++)

@@ -6,11 +6,11 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame.Grid
 {
-    class GridModel : IGridModel
+    class GridModel<TShapeViewType> : IGridModel where TShapeViewType:IShapeView
     {
         //make private some day
         public readonly IShapeView[,] Shapes;
-        private readonly RandomShapeGenerator _randomShapeGenerator = new RandomShapeGenerator();
+        private readonly ShapeViewGenerator<TShapeViewType> _shapeViewGenerator = new ShapeViewGenerator<TShapeViewType>();
 
         public int Turn { get; private set; }
 
@@ -47,10 +47,11 @@ namespace ShapeMatchingGame.Grid
         }
         public GridModel(int rows, int columns, int seed = 0)
         {
-            if (seed != 0)
-                _randomShapeGenerator = new RandomShapeGenerator(seed);
 
-            Shapes = new ShapeView[rows,columns];
+            if (seed != 0)
+                _shapeViewGenerator = new ShapeViewGenerator<TShapeViewType>(seed);
+
+            Shapes = new IShapeView[rows,columns];
             for (int row = 0; row < rows; row++)
                 for (int column = 0; column < columns; column++)
                     Shapes[row, column] = ShapeView.Empty;
@@ -94,9 +95,9 @@ namespace ShapeMatchingGame.Grid
             }
             return isValid;
         }
-        public GridModel CloneRawGrid()
+        public GridModel<IShapeView> CloneRawGrid()
         {
-            GridModel gridModel = new GridModel(DeepCopyShapes());
+            GridModel<IShapeView> gridModel = new GridModel<IShapeView>(DeepCopyShapes());
             return gridModel;
         }
         private bool IsPossibleMove(Position from, Position to)
@@ -210,7 +211,7 @@ namespace ShapeMatchingGame.Grid
                 {
                     if (Shapes[0, column].IsEmpty)
                     {
-                        Shapes[0, column] = _randomShapeGenerator.GetNextShapeView(ShapeType.Normal);
+                        Shapes[0, column] = _shapeViewGenerator.GetNextShapeView(ShapeType.Normal);
                     }
                 }
             }

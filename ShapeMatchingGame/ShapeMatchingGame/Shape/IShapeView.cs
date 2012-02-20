@@ -12,7 +12,5 @@ namespace ShapeMatchingGame.Shape
         bool IsEmpty { get; }
         bool RecentlySwapped { get; set; }
         bool RecentlyDropped { get; set; }
-    
-    
     }
 }

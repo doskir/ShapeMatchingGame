@@ -127,7 +127,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="IDrawableObject.cs" />
-    <Compile Include="RandomShapeGenerator.cs" />
+    <Compile Include="ShapeViewGenerator.cs" />
     <Compile Include="Shape\IShapeModel.cs" />
     <Compile Include="Shape\IShapeView.cs" />
     <Compile Include="Shape\ShapeView.cs" />

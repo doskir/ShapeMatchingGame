@@ -32,6 +32,9 @@ namespace ShapeMatchingGame.Shape
             get { return _shapeModel.RecentlyDropped; }
             set { _shapeModel.RecentlySwapped = value; }
         }
+
+
+
         public ShapeViewDrawable(ShapeColor shapeColor, ShapeType shapeType, Rectangle creationRectangle)
         {
             _shapeModel = new ShapeModel(shapeColor, shapeType);
@@ -77,11 +80,18 @@ namespace ShapeMatchingGame.Shape
             if (ShapeType == ShapeType.Cross)
                 _overlayTexture = Globals.Content.Load<Texture2D>("cross");
         }
-
         public ShapeViewDrawable(ShapeColor shapeColor,ShapeType shapeType):this(shapeColor,shapeType,new Rectangle(0,-50,50,50))
         {
         }
+        public ShapeViewDrawable(IShapeView shapeView)
+            : this(shapeView.ShapeColor, shapeView.ShapeType)
+        {
+            _shapeModel.RecentlyDropped = shapeView.RecentlyDropped;
+            _shapeModel.RecentlySwapped = shapeView.RecentlyDropped;
+        }
+
         public static readonly ShapeViewDrawable Empty = new ShapeViewDrawable(ShapeColor.None, ShapeType.None);
+
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture, Rectangle, shapeDrawColor);
