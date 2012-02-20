@@ -9,7 +9,7 @@ namespace ShapeMatchingGame.Grid
     class GridModel : IGridModel
     {
         //make private some day
-        public readonly ShapeView[,] Shapes;
+        public readonly IShapeView[,] Shapes;
         private readonly RandomShapeGenerator _randomShapeGenerator = new RandomShapeGenerator();
 
         public int Turn { get; private set; }
@@ -127,7 +127,7 @@ namespace ShapeMatchingGame.Grid
         }
         private void Swap(Position from, Position to)
         {
-            ShapeView temp = Shapes[from.Row, from.Column];
+            IShapeView temp = Shapes[from.Row, from.Column];
             Shapes[from.Row, from.Column] = Shapes[to.Row, to.Column];
             Shapes[to.Row, to.Column] = temp;
         }
@@ -331,7 +331,7 @@ namespace ShapeMatchingGame.Grid
                         continue;
                     positionsToClear.Add(new Position(row, position.Column));
                 }
-                for (int column = 0; column < rows; column++)
+                for (int column = 0; column < columns; column++)
                 {
                     if (column == position.Column)
                         continue;

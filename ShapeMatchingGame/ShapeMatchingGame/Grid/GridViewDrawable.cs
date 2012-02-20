@@ -21,7 +21,13 @@ namespace ShapeMatchingGame.Grid
         {
             get { return _gridModel.Turn; }
         }
-        public Rectangle Rectangle;
+        public Rectangle _rectangle;
+        public Rectangle Rectangle
+        {
+            get { return _rectangle; }
+            set { _rectangle = value; }
+        }
+
         public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight)
         {
             _gridModel = new GridModelProxy(rows, columns);
@@ -32,11 +38,11 @@ namespace ShapeMatchingGame.Grid
             {
                 for (int column = 0; column < columns; column++)
                 {
-                    ShapeSlots[row, column] = new ShapeSlot(new Rectangle(column * slotWidth + Rectangle.X, row * slotHeight + Rectangle.Y,
+                    ShapeSlots[row, column] = new ShapeSlot(new Rectangle(column * slotWidth + _rectangle.X, row * slotHeight + _rectangle.Y,
                                                     slotWidth, slotHeight));
                 }
             }
-            Rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
+            _rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
         }
 
 
@@ -66,6 +72,12 @@ namespace ShapeMatchingGame.Grid
             throw new Exception("Shapeslot is not part of the grid. WTF!");
         }
 
+        public Texture2D Texture
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+
         public void Draw(SpriteBatch spriteBatch)
         {
             GridModel underlyingGridModel = _gridModel.CloneRawGrid();
@@ -74,10 +86,6 @@ namespace ShapeMatchingGame.Grid
                 for (int column = 0; column < _columns; column++)
                 {
                     ShapeSlots[row, column].Draw(spriteBatch);
-                    ShapeViewDrawable shapeViewDrawable = new ShapeViewDrawable(underlyingGridModel.Shapes[row, column]);
-                    shapeViewDrawable.Rectangle = ShapeSlots[row, column].Rectangle;
-                    shapeViewDrawable.Draw(spriteBatch);
-
                 }
             }
         }
@@ -115,18 +123,6 @@ namespace ShapeMatchingGame.Grid
                         }
                     }
                 }
-            }
-        }
-
-        public void DebugFunctionAt(Point cursorPosition)
-        {
-            foreach (ShapeSlot slot in ShapeSlots)
-            {
-                if (slot.Rectangle.Contains(cursorPosition))
-                {
-                    slot.ClearSlot();
-                }
-                
             }
         }
     }

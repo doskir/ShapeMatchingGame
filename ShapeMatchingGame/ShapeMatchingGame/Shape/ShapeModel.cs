@@ -1,35 +1,24 @@
 ﻿namespace ShapeMatchingGame.Shape
 {
-    class ShapeModel
+    class ShapeModel : IShapeModel
     {
-        readonly ShapeColor _color;
-        public ShapeColor GetShapeColor()
-        {
-            return _color;
-        }
-
-        readonly ShapeType _type;
-        public ShapeType GetShapeType()
-        {
-            return _type;
-        }
-        public ShapeModel(ShapeColor color,ShapeType type)
-        {
-            _color = color;
-            _type = type;
-        }
+        public ShapeColor ShapeColor { get; private set; }
+        public ShapeType ShapeType { get; private set; }
+        public bool RecentlySwapped { get; set; }
+        public bool RecentlyDropped { get; set; }
         public bool IsEmpty
         {
-            get { return _type == ShapeType.None && _color == ShapeColor.None; }
+            get { return ShapeType == ShapeType.None && ShapeColor == ShapeColor.None; }
         }
-        public static readonly ShapeModel Empty = new ShapeModel(ShapeColor.None, ShapeType.None);
-        public bool RecentlySwapped;
-        public bool RecentlyDropped;
-        public ShapeModel DeepCopy()
+
+        public ShapeModel(ShapeColor shapeColor,ShapeType shapeType)
         {
-            ShapeModel newShape = new ShapeModel(_color, _type);
-            return newShape;
+            ShapeColor = shapeColor;
+            ShapeType = shapeType;
         }
+
+        public static readonly ShapeModel Empty = new ShapeModel(ShapeColor.None, ShapeType.None);
+
     }
 
     public enum ShapeColor
@@ -42,7 +31,6 @@
         White = 5,
         Yellow = 6,
         None
-
     }
 
     public enum ShapeType

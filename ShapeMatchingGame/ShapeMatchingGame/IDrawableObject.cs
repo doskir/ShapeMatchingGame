@@ -9,8 +9,8 @@ namespace ShapeMatchingGame
 {
     interface IDrawableObject
     {
-
+        Texture2D Texture { get; }
+        Rectangle Rectangle { get; set; }
         void Draw(SpriteBatch spriteBatch);
-        void Update();
     }
 }

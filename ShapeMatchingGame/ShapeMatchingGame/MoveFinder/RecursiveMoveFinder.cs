@@ -26,6 +26,7 @@ namespace ShapeMatchingGame.MoveFinder
                 if (bestNextMove == null)
                 {
                     //no valid moves left
+                    move.PredictedScore = Int32.MinValue;
                 }
                 else
                 {

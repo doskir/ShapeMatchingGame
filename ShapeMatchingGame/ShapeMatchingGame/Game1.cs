@@ -24,6 +24,7 @@ namespace ShapeMatchingGame
         {
             graphics = new GraphicsDeviceManager(this);
             this.IsMouseVisible = true;
+            graphics.PreferredBackBufferHeight = 850;
             Content.RootDirectory = "Content";
         }
 
@@ -50,7 +51,7 @@ namespace ShapeMatchingGame
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Globals.Content = Content;
             _spriteFont = Content.Load<SpriteFont>("SpriteFont1");
-            _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
+            _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 16, 8, 50, 50);
             // TODO: use this.Content to load your game content here
         }
 
@@ -82,7 +83,7 @@ namespace ShapeMatchingGame
             if(currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
-                if(_gridViewDrawable.Rectangle.Contains(cursorPosition))
+                if(_gridViewDrawable._rectangle.Contains(cursorPosition))
                 {
                     _gridViewDrawable.Clicked(cursorPosition);
                 }
@@ -90,9 +91,10 @@ namespace ShapeMatchingGame
             if(currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
-                if (_gridViewDrawable.Rectangle.Contains(cursorPosition))
+                if (_gridViewDrawable._rectangle.Contains(cursorPosition))
                 {
-                    _gridViewDrawable.DebugFunctionAt(cursorPosition);
+                    _gridViewDrawable.Update();
+                    //_gridViewDrawable.DebugFunctionAt(cursorPosition);
                 }
             }
 
@@ -108,7 +110,7 @@ namespace ShapeMatchingGame
                 {
                     Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn,
                                     _gridViewDrawable.Score);
-                    _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
+                    _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 16, 8, 50, 50);
                 }
                 else
                 {

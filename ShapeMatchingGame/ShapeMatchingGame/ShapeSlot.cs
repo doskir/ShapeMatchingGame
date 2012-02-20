@@ -8,70 +8,141 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame
 {
-    internal class ShapeSlot : IDrawableObject
+    internal class ShapeSlot : IShapeView,IShapeSlot,IDrawableObject
     {
-        private Shape.ShapeViewDrawable _shapeViewDrawable;
-
-        public Shape.ShapeViewDrawable ShapeViewDrawable
+        public ShapeColor ShapeColor
         {
-            get { return _shapeViewDrawable; }
-            set
+            get { return _shapeViewDrawable.ShapeColor; }
+        }
+        public ShapeType ShapeType
+        {
+            get { return _shapeViewDrawable.ShapeType; }
+        }
+        public bool RecentlyDestroyed { get;set; }
+        public bool RecentlySwapped
+        {
+            get { return _shapeViewDrawable.RecentlySwapped; }
+            set { _shapeViewDrawable.RecentlySwapped = value; }
+        }
+        public bool RecentlyDropped
+        {
+            get { return _shapeViewDrawable.RecentlyDropped; }
+            set { _shapeViewDrawable.RecentlyDropped = value; }
+        }
+        public bool IsHighlighted { get; set; }
+        public bool Moving
+        {
+            get
             {
-                _shapeViewDrawable = value;
-                _shapeViewDrawable.DropTo(Rectangle);
+                return _shapeViewDrawable.Rectangle.X != Rectangle.X || _shapeViewDrawable.Rectangle.Y != Rectangle.Y;
             }
         }
-        public Rectangle Rectangle;
-        public Texture2D Texture;
-        public bool RecentlyDestroyed;
-        public bool RecentlySwappedTo;
-        public bool IsHighlighted;
+        public bool IsEmpty
+        {
+            get { return _shapeViewDrawable.IsEmpty; }
+        }
+        public Texture2D Texture { get; private set; }
+        public Rectangle Rectangle
+        {
+            get { return _rectangle; }
+            set { _rectangle = value; }
+        }
+
+        private ShapeViewDrawable _shapeViewDrawable;
+        private Rectangle _rectangle;
+        private Vector2 _moveSpeed = new Vector2(6.0f, 6.0f);
+
 
         public ShapeSlot(Rectangle rectangle)
         {
-            Rectangle = rectangle;
-            ShapeViewDrawable = new Shape.ShapeViewDrawable(ShapeColor.None, ShapeType.None);
-            Texture = Globals.Content.Load<Texture2D>("shapeSlotFrame");
+            _rectangle = rectangle;
+            _shapeViewDrawable = new ShapeViewDrawable(ShapeColor.None, ShapeType.None);
+            Texture= Globals.Content.Load<Texture2D>("shapeSlotFrame");
         }
-
-        public bool IsEmpty
+        public void AssignShape(IShapeView shapeView)
         {
-            get { return ShapeViewDrawable.IsEmpty; }
+            if (shapeView.GetType() == typeof(ShapeViewDrawable))
+            {
+               _shapeViewDrawable = (ShapeViewDrawable)shapeView;
+            }
+            else
+            {
+                _shapeViewDrawable = new ShapeViewDrawable(shapeView.ShapeColor, shapeView.ShapeType,
+                                                           new Rectangle(Rectangle.X, -50, 50, 50));
+            }
         }
-
         public void Draw(SpriteBatch spriteBatch)
         {
-            Rectangle renderingRectangle = new Rectangle(Rectangle.X, Rectangle.Y, Rectangle.Width,
-                                                         Rectangle.Height);
+            Rectangle renderingRectangle = new Rectangle(_rectangle.X, _rectangle.Y, _rectangle.Width,
+                                                         _rectangle.Height);
             Color frameColor = Color.Black;
             if (IsHighlighted)
                 frameColor = Color.OrangeRed;
             else if (RecentlyDestroyed)
                 frameColor = Color.Yellow;
             spriteBatch.Draw(Texture, renderingRectangle, frameColor);
-            if (ShapeViewDrawable.Rectangle.X == 0 && ShapeViewDrawable.Rectangle.Y == 0)
-            {
-                ShapeViewDrawable.Rectangle.X = Rectangle.X;
-                ShapeViewDrawable.Rectangle.Y = Rectangle.Y;
-            }
-            ShapeViewDrawable.Draw(spriteBatch);
+            _shapeViewDrawable.Draw(spriteBatch);
         }
 
         public void Update()
         {
-            ShapeViewDrawable.Update();
+            if (Moving)
+            {
+                //TODO: check if this sets the rectangle in the shapeview
+                Rectangle newShapeViewRectangle = _shapeViewDrawable.Rectangle;
+               if(_shapeViewDrawable.Rectangle.X > Rectangle.X)
+               {
+                   //move the rectangle to the left
+                   newShapeViewRectangle.X -= (int)_moveSpeed.X;
+                   //check if we moved it too far
+                   if(newShapeViewRectangle.X < Rectangle.X)
+                   {
+                       //move it to the same position
+                       newShapeViewRectangle.X = Rectangle.X;
+                   }
+               }
+               else if (_shapeViewDrawable.Rectangle.X < Rectangle.X)
+               {
+                   //move the rectangle to the right
+                   newShapeViewRectangle.X += (int) _moveSpeed.X;
+                   //check if we moved it too far
+                   if (newShapeViewRectangle.X > Rectangle.X)
+                   {
+                       //move it to the same position
+                       newShapeViewRectangle.X = Rectangle.X;
+                   }
+               }
+                if (_shapeViewDrawable.Rectangle.Y > Rectangle.Y)
+                {
+                    //move the rectangle to the left
+                    newShapeViewRectangle.Y -= (int)_moveSpeed.Y;
+                    //check if we moved it too far
+                    if (newShapeViewRectangle.Y < Rectangle.Y)
+                    {
+                        //move it to the same position
+                        newShapeViewRectangle.Y = Rectangle.Y;
+                    }
+                }
+                else if (_shapeViewDrawable.Rectangle.Y < Rectangle.Y)
+                {
+                    //move the rectangle to the right
+                    newShapeViewRectangle.Y += (int)_moveSpeed.Y;
+                    //check if we moved it too far
+                    if (newShapeViewRectangle.Y > Rectangle.Y)
+                    {
+                        //move it to the same position
+                        newShapeViewRectangle.Y = Rectangle.Y;
+                    }
+                }
+                _shapeViewDrawable.Rectangle = newShapeViewRectangle;
+            }
         }
-
-        public void ClearSlot()
-        {
-            ShapeViewDrawable = ShapeViewDrawable.Empty;
-        }
-
         public void DestroyShape()
         {
-            ClearSlot();
+            _shapeViewDrawable = ShapeViewDrawable.Empty;
             RecentlyDestroyed = true;
         }
     }
+
 }
     

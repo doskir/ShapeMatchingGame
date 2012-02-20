@@ -115,6 +115,7 @@
     <Compile Include="Grid\GridModelProxy.cs" />
     <Compile Include="Grid\IGridModel.cs" />
     <Compile Include="Grid\GridModel.cs" />
+    <Compile Include="IShapeSlot.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="MoveFinder\Helpers.cs" />
@@ -125,8 +126,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
-    <Compile Include="DrawableObject.cs" />
+    <Compile Include="IDrawableObject.cs" />
     <Compile Include="RandomShapeGenerator.cs" />
+    <Compile Include="Shape\IShapeModel.cs" />
+    <Compile Include="Shape\IShapeView.cs" />
     <Compile Include="Shape\ShapeView.cs" />
     <Compile Include="Shape\ShapeViewDrawable.cs" />
     <Compile Include="Shape\ShapeModel.cs" />
