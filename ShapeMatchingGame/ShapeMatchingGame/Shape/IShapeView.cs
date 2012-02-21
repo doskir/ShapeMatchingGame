@@ -14,5 +14,6 @@ namespace ShapeMatchingGame.Shape
         bool RecentlyDropped { get; set; }
         bool RecentlyCreated { get; set; }
         bool Destroyed { get; set; }
+        void Destroy();
     }
 }

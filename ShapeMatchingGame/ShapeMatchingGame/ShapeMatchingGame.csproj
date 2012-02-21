@@ -112,7 +112,6 @@
   <ItemGroup>
     <Compile Include="Globals.cs" />
     <Compile Include="Grid\GridViewDrawable.cs" />
-    <Compile Include="Grid\GridModelProxy.cs" />
     <Compile Include="Grid\IGridModel.cs" />
     <Compile Include="Grid\GridModel.cs" />
     <Compile Include="IShapeSlot.cs" />

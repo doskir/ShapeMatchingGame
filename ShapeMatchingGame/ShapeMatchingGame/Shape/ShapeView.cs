@@ -11,12 +11,24 @@ namespace ShapeMatchingGame.Shape
 
         public ShapeColor ShapeColor
         {
-            get { return ShapeModel.ShapeColor; }
+            get
+            {
+                if (Destroyed)
+                    return ShapeColor.None;
+                return ShapeModel.ShapeColor;
+            }
         }
+
         public ShapeType ShapeType
         {
-            get { return ShapeModel.ShapeType; }
+            get
+            {
+                if (Destroyed)
+                    return ShapeType.None;
+                return ShapeModel.ShapeType;
+            }
         }
+
         public bool IsEmpty
         {
             get { return ShapeModel.IsEmpty || Destroyed; }
@@ -36,6 +48,10 @@ namespace ShapeMatchingGame.Shape
         public bool RecentlyCreated { get; set; }
 
         public bool Destroyed { get; set; }
+        public void Destroy()
+        {
+            Destroyed = true;
+        }
 
         public ShapeView(ShapeColor color,ShapeType type)
         {

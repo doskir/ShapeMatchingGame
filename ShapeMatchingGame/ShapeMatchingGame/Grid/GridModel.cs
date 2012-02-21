@@ -8,34 +8,13 @@ namespace ShapeMatchingGame.Grid
 {
     class GridModel<TShapeViewType> : IGridModel where TShapeViewType:IShapeView
     {
-        public GridModel<TShapeViewType> CloneRawGrid()
-        {
-            Type specificType = typeof(TShapeViewType);
-            var gridModel = new GridModel<TShapeViewType>(DeepCopyShapes());
-            return gridModel;
-        }
-        private IShapeView[,] DeepCopyShapes()
-        {
-            IShapeView[,] cloned = new IShapeView[Rows, Columns];
-            for (int row = 0; row < cloned.GetLength(0); row++)
-            {
-                for (int column = 0; column < cloned.GetLength(1); column++)
-                {
-                    //shapeviews do not allow changing of the color or type of a shape
-                    cloned[row, column] = _shapeViewGenerator.GetShapeView(Shapes[row, column].ShapeColor,
-                                                                           Shapes[row, column].ShapeType);
-                }
-            }
-            return cloned;
-        }
         //make private some day
-        public readonly IShapeView[,] Shapes;
+        protected readonly IShapeView[,] Shapes;
         private readonly ShapeViewGenerator<TShapeViewType> _shapeViewGenerator = new ShapeViewGenerator<TShapeViewType>();
 
+        #region Properties
         public int Turn { get; private set; }
-
         public int Score { get; private set; }
-
         public int Rows
         {
             get { return Shapes.GetLength(0); }
@@ -60,6 +39,7 @@ namespace ShapeMatchingGame.Grid
                 return false;
             }
         }
+        #endregion
 
         private GridModel(IShapeView[,] shapes)
         {
@@ -79,10 +59,10 @@ namespace ShapeMatchingGame.Grid
             Score += addedScore;
         }
 
-
+        #region Logic
         public bool DoMove(Move move)
         {
-            if (!IsValidMove(move.From, move.To))
+            if (!IsValidMove(move))
                 return false;
             foreach (IShapeView shapeView in Shapes)
             {
@@ -90,57 +70,54 @@ namespace ShapeMatchingGame.Grid
                 shapeView.RecentlyDropped = false;
             }
             Swap(move.From, move.To);
-            Shapes[move.From.Row, move.From.Column].RecentlySwapped = true;
-            Shapes[move.To.Row, move.To.Column].RecentlySwapped = true;
             int addedScore;
             FinishTurn(out addedScore);
             Score += addedScore;
             return true;
         }
-        public bool IsValidMove(Position from, Position to)
+        public bool IsValidMove(Move move)
         {
             bool isValid;
             lock (Shapes)
             {
-                if (!IsPossibleMove(from, to))
+                if (!IsPossibleMove(move))
                     return false;
-                if (Shapes[from.Row, from.Column].IsEmpty || Shapes[to.Row, to.Column].IsEmpty)
+                if (Shapes[move.From.Row, move.From.Column].IsEmpty || Shapes[move.To.Row, move.To.Column].IsEmpty)
                     return false;
-                Swap(from, to);
-                isValid = GetMatchAtPosition(to).IsValid
-                          || GetMatchAtPosition(from).IsValid;
+                Swap(move.From, move.To);
+                isValid = GetMatchAtPosition(move.To).IsValid
+                          || GetMatchAtPosition(move.From).IsValid;
                 //reverse the move
-                Swap(from, to);
+                Swap(move.From, move.To);
             }
             return isValid;
         }
-
-        private bool IsPossibleMove(Position from, Position to)
+        private bool IsPossibleMove(Move move)
         {
             //check if the shapeslot is left of the other shapeslot
-            if (from.Column + 1 == to.Column && from.Row == to.Row)
+            if (move.From.Column + 1 == move.To.Column && move.From.Row == move.To.Row)
                 return true;
             //check if the shapeslot is right of the other shapeslot
-            if (from.Column - 1 == to.Column && from.Row == to.Row)
+            if (move.From.Column - 1 == move.To.Column && move.From.Row == move.To.Row)
                 return true;
             //check if the shapeslot is above the other shapeslot
-            if (from.Row + 1 == to.Row && from.Column == to.Column)
+            if (move.From.Row + 1 == move.To.Row && move.From.Column == move.To.Column)
                 return true;
             //check if the shapeslot is below the other shapeslot
-            if (from.Row - 1 == to.Row && from.Column == to.Column)
+            if (move.From.Row - 1 == move.To.Row && move.From.Column == move.To.Column)
                 return true;
             return false;
         }
         private void FinishTurn(out int bonusScore)
         {
             bonusScore = 0;
-            HandleMatches(ref bonusScore);
+            bool foundMatches;
             do
             {
                 DropShapes();
                 FillGrid();
-                HandleMatches(ref bonusScore);
-            } while (HasEmptyFields);
+                foundMatches = HandleMatches(ref bonusScore);
+            } while (foundMatches || HasEmptyFields);
             Turn++;
         }
         private void Swap(Position from, Position to)
@@ -148,6 +125,8 @@ namespace ShapeMatchingGame.Grid
             IShapeView temp = Shapes[from.Row, from.Column];
             Shapes[from.Row, from.Column] = Shapes[to.Row, to.Column];
             Shapes[to.Row, to.Column] = temp;
+            Shapes[from.Row, from.Column].RecentlySwapped = true;
+            Shapes[to.Row, to.Column].RecentlySwapped = true;
         }
         private Match GetMatchAtPosition(Position position)
         {
@@ -220,6 +199,76 @@ namespace ShapeMatchingGame.Grid
             Match match = new Match(involvedShapes, position, creates);
             return match;
         }
+        private IEnumerable<Match> GetMatches()
+        {
+            int rows = Shapes.GetLength(0);
+            int columns = Shapes.GetLength(1);
+            List<Match> matches = new List<Match>();
+            for (int originRow = 0; originRow < rows; originRow++)
+            {
+                for (int originColumn = 0; originColumn < columns; originColumn++)
+                {
+                    Match match = GetMatchAtPosition(new Position(originRow, originColumn));
+                    if (match.IsValid)
+                    {
+                        bool duplicateMatch = matches.Any(existingMatch => existingMatch.InvolvedPositions.Contains(match.Center));
+                        //prevent duplicate match adding
+                        if (!duplicateMatch)
+                            matches.Add(match);
+                    }
+                }
+            }
+            return matches;
+        }
+        private bool HandleMatches(ref int score)
+        {
+            bool foundMatch;
+            foundMatch = false;
+            IEnumerable<Match> matches = GetMatches();
+            foreach (Match match in matches)
+            {
+                if (match.IsValid)
+                {
+                    foundMatch = true;
+                    ShapeColor color = ShapeColor.None;
+                    foreach (Position position in match.InvolvedPositions)
+                    {
+                        color = Shapes[position.Row, position.Column].ShapeColor;
+                        DestroyShape(position, ref score);
+                    }
+                    if (match.Creates != Creates.Nothing)
+                    {
+                        //get the best spot to create the new shape
+                        Position bestPosition = new Position(-1, -1);
+                        foreach (Position position in match.InvolvedPositions)
+                        {
+                            if (Shapes[position.Row, position.Column].RecentlySwapped)
+                            {
+                                bestPosition = position;
+                                break;
+                            }
+                            if (Shapes[position.Row, position.Column].RecentlyDropped)
+                                bestPosition = position;
+                        }
+                        if (bestPosition.Row == -1 && bestPosition.Column == -1)
+                            bestPosition = match.Center;
+                        if (match.Creates == Creates.Blast)
+                            Shapes[bestPosition.Row, bestPosition.Column] = _shapeViewGenerator.GetShapeView(color,
+                                                                                                             ShapeType
+                                                                                                                 .
+                                                                                                                 Blast);
+
+                        else if (match.Creates == Creates.Cross)
+                            Shapes[bestPosition.Row, bestPosition.Column] = _shapeViewGenerator.GetShapeView(color,
+                                                                                                             ShapeType
+                                                                                                                 .
+                                                                                                                 Cross);
+                    }
+
+                }
+            }
+            return foundMatch;
+        }
         private void FillGrid()
         {
             for (int column = 0; column < Columns; column++)
@@ -232,58 +281,6 @@ namespace ShapeMatchingGame.Grid
                     }
                 }
             }
-        }
-        private void HandleMatches(ref int score)
-        {
-            bool foundMatch;
-            do
-            {
-                foundMatch = false;
-                IEnumerable<Match> matches = GetMatches();
-                foreach (Match match in matches)
-                {
-                    if (match.IsValid)
-                    {
-                        foundMatch = true;
-                        ShapeColor color = ShapeColor.None;
-                        foreach (Position position in match.InvolvedPositions)
-                        {
-                            color = Shapes[position.Row, position.Column].ShapeColor;
-                            DestroyShape(position, ref score);
-                        }
-                        if (match.Creates != Creates.Nothing)
-                        {
-                            //get the best spot to create the new shape
-                            Position bestPosition = new Position(-1, -1);
-                            foreach (Position position in match.InvolvedPositions)
-                            {
-                                if (Shapes[position.Row, position.Column].RecentlySwapped)
-                                {
-                                    bestPosition = position;
-                                    break;
-                                }
-                                if (Shapes[position.Row, position.Column].RecentlyDropped)
-                                    bestPosition = position;
-                            }
-                            if (bestPosition.Row == -1 && bestPosition.Column == -1)
-                                bestPosition = match.Center;
-                            if (match.Creates == Creates.Blast)
-                                Shapes[bestPosition.Row, bestPosition.Column] = _shapeViewGenerator.GetShapeView(color,
-                                                                                                                 ShapeType
-                                                                                                                     .
-                                                                                                                     Blast);
-
-                            else if (match.Creates == Creates.Cross)
-                                Shapes[bestPosition.Row, bestPosition.Column] = _shapeViewGenerator.GetShapeView(color,
-                                                                                                                 ShapeType
-                                                                                                                     .
-                                                                                                                     Cross);
-                        }
-
-                    }
-                }
-                DropShapes();
-            } while (foundMatch);
         }
         private void DropShapes()
         {
@@ -302,6 +299,7 @@ namespace ShapeMatchingGame.Grid
                         if (Shapes[row + 1, column].IsEmpty)
                         {
                             Shapes[row + 1, column] = Shapes[row, column];
+                            Shapes[row + 1, column].RecentlyDropped = true;
                             Shapes[row, column] = _shapeViewGenerator.GetEmptyShapeView();
                             shapeDropped = true;
                         }
@@ -315,8 +313,7 @@ namespace ShapeMatchingGame.Grid
             int columns = Shapes.GetLength(1);
             ShapeType type = Shapes[position.Row, position.Column].ShapeType;
             //to prevent infinite loops
-            Shapes[position.Row, position.Column].Destroyed = true;
-            Shapes[position.Row, position.Column] = _shapeViewGenerator.GetEmptyShapeView();
+            Shapes[position.Row, position.Column].Destroy();
             if (type == ShapeType.Blast)
             {
                 List<Position> positionsToClear = new List<Position>();
@@ -366,31 +363,29 @@ namespace ShapeMatchingGame.Grid
             }
             if (type != ShapeType.None)
             {
-                Shapes[position.Row, position.Column].Destroyed = true;
-                Shapes[position.Row, position.Column] = _shapeViewGenerator.GetEmptyShapeView();
+                Shapes[position.Row, position.Column].Destroy();
                 score += 100;
             }
         }
-        private IEnumerable<Match> GetMatches()
+        #endregion
+        public GridModel<TShapeViewType> CloneRawGrid()
         {
-            int rows = Shapes.GetLength(0);
-            int columns = Shapes.GetLength(1);
-            List<Match> matches = new List<Match>();
-            for (int originRow = 0; originRow < rows; originRow++)
+            var gridModel = new GridModel<TShapeViewType>(DeepCopyShapes());
+            return gridModel;
+        }
+        private IShapeView[,] DeepCopyShapes()
+        {
+            IShapeView[,] cloned = new IShapeView[Rows, Columns];
+            for (int row = 0; row < cloned.GetLength(0); row++)
             {
-                for (int originColumn = 0; originColumn < columns; originColumn++)
+                for (int column = 0; column < cloned.GetLength(1); column++)
                 {
-                    Match match = GetMatchAtPosition(new Position(originRow, originColumn));
-                    if (match.IsValid)
-                    {
-                        bool duplicateMatch = matches.Any(existingMatch => existingMatch.InvolvedPositions.Contains(match.Center));
-                        //prevent duplicate match adding
-                        if (!duplicateMatch)
-                            matches.Add(match);
-                    }
+                    //shapeviews do not allow changing of the color or type of a shape
+                    cloned[row, column] = _shapeViewGenerator.GetShapeView(Shapes[row, column].ShapeColor,
+                                                                           Shapes[row, column].ShapeType);
                 }
             }
-            return matches;
+            return cloned;
         }
 
     }

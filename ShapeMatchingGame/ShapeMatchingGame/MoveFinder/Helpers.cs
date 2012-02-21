@@ -7,7 +7,7 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame.MoveFinder
 {
-    class Helpers
+    static class Helpers
     {
         public static List<Move> GetValidMoves(GridModel<ShapeViewDrawable> gridModel)
         {
@@ -15,7 +15,7 @@ namespace ShapeMatchingGame.MoveFinder
             List<Move> validMoves = new List<Move>();
             foreach (Move move in possibleMoves)
             {
-                if (gridModel.IsValidMove(move.From, move.To))
+                if (gridModel.IsValidMove(move))
                 {
                     validMoves.Add(move);
                 }

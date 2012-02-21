@@ -90,7 +90,7 @@ namespace ShapeMatchingGame
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
                 if(_gridViewDrawable.Rectangle.Contains(cursorPosition))
                 {
-                    _gridViewDrawable.Clicked(cursorPosition);
+                    _gridViewDrawable.Click(cursorPosition);
                 }
             }
             if(currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
@@ -120,7 +120,7 @@ namespace ShapeMatchingGame
                 else
                 {
                     int predictedScore = _gridViewDrawable.Score + bestMove.PredictedScore;
-                    _gridViewDrawable.DoMove(bestMove.From, bestMove.To);
+                    _gridViewDrawable.DoMove(bestMove);
                     if (predictedScore > _gridViewDrawable.Score)
                     {
                         //Debug.WriteLine("predicted score was too high");
