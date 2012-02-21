@@ -8,7 +8,7 @@ namespace ShapeMatchingGame.Shape
     public class ShapeView : IShapeView
     {
         protected readonly ShapeModel ShapeModel;
-
+        #region Properties
         public ShapeColor ShapeColor
         {
             get
@@ -18,7 +18,6 @@ namespace ShapeMatchingGame.Shape
                 return ShapeModel.ShapeColor;
             }
         }
-
         public ShapeType ShapeType
         {
             get
@@ -28,7 +27,6 @@ namespace ShapeMatchingGame.Shape
                 return ShapeModel.ShapeType;
             }
         }
-
         public bool IsEmpty
         {
             get { return ShapeModel.IsEmpty || Destroyed; }
@@ -43,11 +41,9 @@ namespace ShapeMatchingGame.Shape
             get { return ShapeModel.RecentlyDropped; }
             set { ShapeModel.RecentlySwapped = value; }
         }
-
-
         public bool RecentlyCreated { get; set; }
-
         public bool Destroyed { get; set; }
+        #endregion
         public void Destroy()
         {
             Destroyed = true;

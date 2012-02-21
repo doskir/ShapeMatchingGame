@@ -68,6 +68,7 @@ namespace ShapeMatchingGame.Grid
             {
                 shapeView.RecentlySwapped = false;
                 shapeView.RecentlyDropped = false;
+                shapeView.RecentlyCreated = false;
             }
             Swap(move.From, move.To);
             int addedScore;

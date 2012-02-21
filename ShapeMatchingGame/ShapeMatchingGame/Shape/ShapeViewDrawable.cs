@@ -5,11 +5,12 @@ namespace ShapeMatchingGame.Shape
 {
     class ShapeViewDrawable : ShapeView,IDrawableObject
     {
+        #region Properties
         public Texture2D Texture { get; private set; }
         private readonly Texture2D _overlayTexture;
         private readonly Color _shapeDrawColor;
         public Rectangle Rectangle { get; set; }
-
+        #endregion
         public ShapeViewDrawable(ShapeColor shapeColor, ShapeType shapeType, Rectangle creationRectangle):base(shapeColor,shapeType)
         {
             Rectangle = creationRectangle;

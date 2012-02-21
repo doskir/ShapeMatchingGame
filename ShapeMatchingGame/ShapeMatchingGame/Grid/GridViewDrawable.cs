@@ -62,10 +62,10 @@ namespace ShapeMatchingGame.Grid
         {
             if(base.DoMove(move))
             {
-                //swap the slots
-                IShapeView temp = ShapeSlots[move.From.Row, move.From.Column].AssignedShape;
-                ShapeSlots[move.From.Row, move.From.Column].AssignShape(ShapeSlots[move.To.Row, move.To.Column].AssignedShape);
-                ShapeSlots[move.To.Row, move.To.Column].AssignShape(temp);
+                //after doing a move the shape will still be associated with the wrong slot...
+                SwapAssignedShapes(ShapeSlots[move.From.Row, move.From.Column], ShapeSlots[move.To.Row, move.To.Column]);
+                //the shapeslots still have their shapes assigned, we can use this to find out which shapes have been destroyed
+                //and mark their slots accordingly                                 
                 foreach(ShapeSlot shapeSlot in ShapeSlots)
                 {
                     shapeSlot.RecentlyDestroyed = shapeSlot.AssignedShape.Destroyed;
@@ -105,7 +105,12 @@ namespace ShapeMatchingGame.Grid
                 }
             }
         }
-
+        private void SwapAssignedShapes(ShapeSlot shapeSlot,ShapeSlot other)
+        {
+            IShapeView temp = shapeSlot.AssignedShape;
+            shapeSlot.AssignShape(other.AssignedShape);
+            other.AssignShape(temp);
+        }
         private void AssignShapes()
         {
             for (int row = 0; row < Rows; row++)

@@ -7,9 +7,9 @@ namespace ShapeMatchingGame
 {
     class Match
     {
-        public List<Position> InvolvedPositions;
-        public Position Center;
-        public Creates Creates;
+        public readonly List<Position> InvolvedPositions;
+        public readonly Position Center;
+        public readonly Creates Creates;
         public bool IsValid;
         public Match(List<Position> positions,Position center,Creates creates)
         {
@@ -21,7 +21,7 @@ namespace ShapeMatchingGame
             IsValid = true;
         }
 
-        public static Match Empty = new Match(new List<Position>(), new Position(-1, -1), Creates.Nothing)
+        public static readonly Match Empty = new Match(new List<Position>(), new Position(-1, -1), Creates.Nothing)
                                         {IsValid = false};
     }
     enum Creates

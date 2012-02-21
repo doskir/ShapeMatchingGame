@@ -2,15 +2,17 @@
 {
     public class ShapeModel : IShapeModel
     {
+        #region Properties
         public ShapeColor ShapeColor { get; private set; }
         public ShapeType ShapeType { get; private set; }
         public bool RecentlySwapped { get; set; }
         public bool RecentlyDropped { get; set; }
+        
         public bool IsEmpty
         {
             get { return ShapeType == ShapeType.None && ShapeColor == ShapeColor.None; }
         }
-
+        #endregion
         public ShapeModel(ShapeColor shapeColor,ShapeType shapeType)
         {
             ShapeColor = shapeColor;
