@@ -7,34 +7,40 @@ namespace ShapeMatchingGame.Shape
 {
     public class ShapeView : IShapeView
     {
-        private ShapeModel _shapeModel;
+        protected readonly ShapeModel ShapeModel;
 
         public ShapeColor ShapeColor
         {
-            get { return _shapeModel.ShapeColor; }
+            get { return ShapeModel.ShapeColor; }
         }
         public ShapeType ShapeType
         {
-            get { return _shapeModel.ShapeType; }
+            get { return ShapeModel.ShapeType; }
         }
         public bool IsEmpty
         {
-            get { return _shapeModel.IsEmpty; }
+            get { return ShapeModel.IsEmpty || Destroyed; }
         }
         public bool RecentlySwapped
         {
-            get { return _shapeModel.RecentlySwapped; }
-            set { _shapeModel.RecentlySwapped = value; }
+            get { return ShapeModel.RecentlySwapped; }
+            set { ShapeModel.RecentlySwapped = value; }
         }
         public bool RecentlyDropped
         {
-            get { return _shapeModel.RecentlyDropped; }
-            set { _shapeModel.RecentlySwapped = value; }
+            get { return ShapeModel.RecentlyDropped; }
+            set { ShapeModel.RecentlySwapped = value; }
         }
+
+
+        public bool RecentlyCreated { get; set; }
+
+        public bool Destroyed { get; set; }
+
         public ShapeView(ShapeColor color,ShapeType type)
         {
-            _shapeModel = new ShapeModel(color, type);
+            ShapeModel = new ShapeModel(color, type);
+            RecentlyCreated = true;
         }
-        public static ShapeView Empty = new ShapeView(ShapeColor.None, ShapeType.None);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ShapeMatchingGame.Shape
 {
-    class ShapeModel : IShapeModel
+    public class ShapeModel : IShapeModel
     {
         public ShapeColor ShapeColor { get; private set; }
         public ShapeType ShapeType { get; private set; }
@@ -16,8 +16,6 @@
             ShapeColor = shapeColor;
             ShapeType = shapeType;
         }
-
-        public static readonly ShapeModel Empty = new ShapeModel(ShapeColor.None, ShapeType.None);
 
     }
 

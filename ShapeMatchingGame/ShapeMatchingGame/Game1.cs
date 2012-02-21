@@ -55,10 +55,8 @@ namespace ShapeMatchingGame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             _spriteFont = Content.Load<SpriteFont>("SpriteFont1");
-            _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 16, 8, 50, 50);
+            _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
 
-            ShapeSlot s1 = new ShapeSlot(new Rectangle(0, 0, 0, 0));
-            s1.AssignShape(new ShapeView(ShapeColor.Red, ShapeType.Normal));
             // TODO: use this.Content to load your game content here
         }
 
@@ -90,7 +88,7 @@ namespace ShapeMatchingGame
             if(currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
-                if(_gridViewDrawable._rectangle.Contains(cursorPosition))
+                if(_gridViewDrawable.Rectangle.Contains(cursorPosition))
                 {
                     _gridViewDrawable.Clicked(cursorPosition);
                 }
@@ -98,7 +96,7 @@ namespace ShapeMatchingGame
             if(currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
-                if (_gridViewDrawable._rectangle.Contains(cursorPosition))
+                if (_gridViewDrawable.Rectangle.Contains(cursorPosition))
                 {
                     _gridViewDrawable.Update();
                     //_gridViewDrawable.DebugFunctionAt(cursorPosition);
@@ -112,12 +110,12 @@ namespace ShapeMatchingGame
             if (playAlone)
             {
                 MoveFinder.IMoveFinder moveFinder = new RecursiveMoveFinder();
-                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 1);
+                Move bestMove = moveFinder.GetBestMove(_gridViewDrawable.ToGridModel(), 2);
                 if (bestMove == null)
                 {
                     Debug.WriteLine("Game over on turn {0}. \n Score:{1}", _gridViewDrawable.Turn,
                                     _gridViewDrawable.Score);
-                    _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 16, 8, 50, 50);
+                    _gridViewDrawable = new GridViewDrawable(new Point(20, 20), 8, 8, 50, 50);
                 }
                 else
                 {

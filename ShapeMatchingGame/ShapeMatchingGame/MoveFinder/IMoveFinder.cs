@@ -9,6 +9,6 @@ namespace ShapeMatchingGame.MoveFinder
 {
     interface IMoveFinder
     {
-        Move GetBestMove(GridModel<IShapeView> gridModel, int movesToLookAhead);
+        Move GetBestMove(GridModel<ShapeViewDrawable> gridModel, int movesToLookAhead);
     }
 }

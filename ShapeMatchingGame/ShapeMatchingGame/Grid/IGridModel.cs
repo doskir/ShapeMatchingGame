@@ -9,7 +9,7 @@ namespace ShapeMatchingGame.Grid
     internal interface IGridModel
     {
         bool DoMove(Move move);
-        GridModel<IShapeView> CloneRawGrid();
+
         int Turn { get; }
         int Score { get; }
         int Rows { get; }

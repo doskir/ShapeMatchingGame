@@ -10,14 +10,14 @@ namespace ShapeMatchingGame.MoveFinder
 {
     class RecursiveMoveFinder : IMoveFinder
     {
-        public Move GetBestMove(GridModel<IShapeView> gridModel, int movesToLookAhead)
+        public Move GetBestMove(GridModel<ShapeViewDrawable> gridModel, int movesToLookAhead)
         {
             if (movesToLookAhead < 1)
                 throw new Exception();
             List<Move> validMoves = Helpers.GetValidMoves(gridModel);
             foreach (Move move in validMoves)
             {
-                GridModel<IShapeView> tempGridModel = gridModel.CloneRawGrid();
+                GridModel<ShapeViewDrawable> tempGridModel = gridModel.CloneRawGrid();
                 tempGridModel.DoMove(move);
                 //do the whole matching stuff on it
                 move.PredictedScore = tempGridModel.Score;

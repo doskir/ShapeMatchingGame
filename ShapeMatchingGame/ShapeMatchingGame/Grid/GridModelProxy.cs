@@ -13,7 +13,7 @@ namespace ShapeMatchingGame.Grid
             return _gridModel.DoMove(move);
         }
 
-        public GridModel<IShapeView> CloneRawGrid()
+        public object CloneRawGrid()
         {
             return _gridModel.CloneRawGrid();
         }

@@ -3,76 +3,50 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShapeMatchingGame.Shape
 {
-    class ShapeViewDrawable : IShapeView,IDrawableObject
+    class ShapeViewDrawable : ShapeView,IDrawableObject
     {
-        private ShapeModel _shapeModel;
         public Texture2D Texture { get; private set; }
-        private Texture2D _overlayTexture;
-        private Color shapeDrawColor;
+        private readonly Texture2D _overlayTexture;
+        private readonly Color _shapeDrawColor;
         public Rectangle Rectangle { get; set; }
-        public ShapeColor ShapeColor
-        {
-            get { return _shapeModel.ShapeColor; }
-        }
-        public ShapeType ShapeType
-        {
-            get { return _shapeModel.ShapeType; }
-        }
-        public bool IsEmpty
-        {
-            get { return _shapeModel.IsEmpty; }
-        }
-        public bool RecentlySwapped
-        {
-            get { return _shapeModel.RecentlySwapped; }
-            set { _shapeModel.RecentlySwapped = value; }
-        }
-        public bool RecentlyDropped
-        {
-            get { return _shapeModel.RecentlyDropped; }
-            set { _shapeModel.RecentlySwapped = value; }
-        }
 
-
-
-        public ShapeViewDrawable(ShapeColor shapeColor, ShapeType shapeType, Rectangle creationRectangle)
+        public ShapeViewDrawable(ShapeColor shapeColor, ShapeType shapeType, Rectangle creationRectangle):base(shapeColor,shapeType)
         {
-            _shapeModel = new ShapeModel(shapeColor, shapeType);
             Rectangle = creationRectangle;
             switch (ShapeColor)
             {
                 case ShapeColor.Blue:
                     Texture = Globals.Content.Load<Texture2D>("triangle");
-                    shapeDrawColor = Color.Blue;
+                    _shapeDrawColor = Color.Blue;
                     break;
                 case ShapeColor.Green:
                     Texture = Globals.Content.Load<Texture2D>("rectangle");
-                    shapeDrawColor = Color.Green;
+                    _shapeDrawColor = Color.Green;
                     break;
                 case ShapeColor.Orange:
                     Texture = Globals.Content.Load<Texture2D>("pentagon");
-                    shapeDrawColor = Color.Orange;
+                    _shapeDrawColor = Color.Orange;
                     break;
                 case ShapeColor.Red:
                     Texture = Globals.Content.Load<Texture2D>("hexagon");
-                    shapeDrawColor = Color.Red;
+                    _shapeDrawColor = Color.Red;
                     break;
                 case ShapeColor.Violet:
                     Texture = Globals.Content.Load<Texture2D>("heptagon");
-                    shapeDrawColor = Color.Violet;
+                    _shapeDrawColor = Color.Violet;
                     break;
                 case ShapeColor.White:
                     Texture = Globals.Content.Load<Texture2D>("rotatedRectangle");
-                    shapeDrawColor = Color.White;
+                    _shapeDrawColor = Color.White;
                     break;
                 case ShapeColor.Yellow:
                     Texture = Globals.Content.Load<Texture2D>("circle");
-                    shapeDrawColor = Color.Yellow;
+                    _shapeDrawColor = Color.Yellow;
                     break;
                 default:
                     //load an invisible texture
                     Texture = Globals.Content.Load<Texture2D>("pixel");
-                    shapeDrawColor = Color.Transparent;
+                    _shapeDrawColor = Color.Transparent;
                     break;
             }
             if (ShapeType == ShapeType.Blast)
@@ -86,15 +60,15 @@ namespace ShapeMatchingGame.Shape
         public ShapeViewDrawable(IShapeView shapeView)
             : this(shapeView.ShapeColor, shapeView.ShapeType)
         {
-            _shapeModel.RecentlyDropped = shapeView.RecentlyDropped;
-            _shapeModel.RecentlySwapped = shapeView.RecentlyDropped;
+            ShapeModel.RecentlyDropped = shapeView.RecentlyDropped;
+            ShapeModel.RecentlySwapped = shapeView.RecentlyDropped;
+            if (!shapeView.RecentlyCreated)
+                RecentlyCreated = false;
         }
-
-        public static readonly ShapeViewDrawable Empty = new ShapeViewDrawable(ShapeColor.None, ShapeType.None);
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Texture, Rectangle, shapeDrawColor);
+            spriteBatch.Draw(Texture, Rectangle, _shapeDrawColor);
             Rectangle centeredRectangle = new Rectangle(Rectangle.X + Rectangle.Width/4,
                                                         Rectangle.Y + Rectangle.Height/4, Rectangle.Width/2,
                                                         Rectangle.Height/2);

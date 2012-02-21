@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -8,7 +9,7 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame
 {
-    internal class ShapeSlot : IShapeView,IShapeSlot,IDrawableObject
+    internal class ShapeSlot : IShapeSlot,IDrawableObject
     {
         public ShapeColor ShapeColor
         {
@@ -23,11 +24,6 @@ namespace ShapeMatchingGame
         {
             get { return _shapeViewDrawable.RecentlySwapped; }
             set { _shapeViewDrawable.RecentlySwapped = value; }
-        }
-        public bool RecentlyDropped
-        {
-            get { return _shapeViewDrawable.RecentlyDropped; }
-            set { _shapeViewDrawable.RecentlyDropped = value; }
         }
         public bool IsHighlighted { get; set; }
         public bool Moving
@@ -49,6 +45,10 @@ namespace ShapeMatchingGame
         }
 
         private ShapeViewDrawable _shapeViewDrawable;
+        public ShapeViewDrawable AssignedShape
+        {
+            get { return _shapeViewDrawable; }
+        }
         private Rectangle _rectangle;
         private Vector2 _moveSpeed = new Vector2(6.0f, 6.0f);
 
@@ -68,6 +68,12 @@ namespace ShapeMatchingGame
             else
             {
                 _shapeViewDrawable = new ShapeViewDrawable(shapeView);
+            }
+            if(shapeView.RecentlyCreated)
+            {
+                _shapeViewDrawable.Rectangle = new Rectangle(Rectangle.X, _shapeViewDrawable.Rectangle.Y,
+                                                             _shapeViewDrawable.Rectangle.Width,
+                                                             _shapeViewDrawable.Rectangle.Height);
             }
         }
         public void Draw(SpriteBatch spriteBatch)
@@ -135,11 +141,6 @@ namespace ShapeMatchingGame
                 }
                 _shapeViewDrawable.Rectangle = newShapeViewRectangle;
             }
-        }
-        public void DestroyShape()
-        {
-            _shapeViewDrawable = ShapeViewDrawable.Empty;
-            RecentlyDestroyed = true;
         }
     }
 

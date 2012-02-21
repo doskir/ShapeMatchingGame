@@ -9,7 +9,7 @@ namespace ShapeMatchingGame.MoveFinder
 {
     class Helpers
     {
-        public static List<Move> GetValidMoves(GridModel<IShapeView> gridModel)
+        public static List<Move> GetValidMoves(GridModel<ShapeViewDrawable> gridModel)
         {
             List<Move> possibleMoves = GetPossibleMoves(gridModel);
             List<Move> validMoves = new List<Move>();
@@ -22,7 +22,7 @@ namespace ShapeMatchingGame.MoveFinder
             }
             return validMoves;
         }
-        private static List<Move> GetPossibleMoves(GridModel<IShapeView> gridModel)
+        private static List<Move> GetPossibleMoves(GridModel<ShapeViewDrawable> gridModel)
         {
             int rows = gridModel.Rows;
             int columns = gridModel.Columns;

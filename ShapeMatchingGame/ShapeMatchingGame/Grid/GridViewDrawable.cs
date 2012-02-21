@@ -6,33 +6,19 @@ using ShapeMatchingGame.Shape;
 
 namespace ShapeMatchingGame.Grid
 {
-    class GridViewDrawable : IDrawableObject
+    class GridViewDrawable : GridModel<ShapeViewDrawable>, IDrawableObject
     {
-        private GridModelProxy<ShapeViewDrawable> _gridModel;
-        public ShapeSlot[,] ShapeSlots;
-        private int _rows;
-        private int _columns;
+        public readonly ShapeSlot[,] ShapeSlots;
         private ShapeSlot _currentlyHighlightedShapeSlot;
-        public int Score
-        {
-            get { return _gridModel.Score; }
-        }
-        public int Turn
-        {
-            get { return _gridModel.Turn; }
-        }
-        public Rectangle _rectangle;
+        private Rectangle _rectangle;
         public Rectangle Rectangle
         {
             get { return _rectangle; }
             set { _rectangle = value; }
         }
 
-        public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight)
+        public GridViewDrawable(Point position,int rows,int columns,int slotWidth,int slotHeight) : base(rows,columns)
         {
-            _gridModel = new GridModelProxy<ShapeViewDrawable>(rows, columns);
-            _rows = _gridModel.Rows;
-            _columns = _gridModel.Columns;
             ShapeSlots = new ShapeSlot[rows, columns];
             for (int row = 0; row < rows; row++)
             {
@@ -43,6 +29,7 @@ namespace ShapeMatchingGame.Grid
                 }
             }
             _rectangle = new Rectangle(position.X, position.Y, columns * slotWidth, rows * slotHeight);
+            AssignShapes();
         }
 
 
@@ -52,16 +39,16 @@ namespace ShapeMatchingGame.Grid
                 shapeSlot.Update();
         }
 
-        public GridModel<IShapeView> ToGridModel()
+        public GridModel<ShapeViewDrawable> ToGridModel()
         {
-            return _gridModel.CloneRawGrid();
+            return CloneRawGrid();
         }
 
         public Position GetShapeSlotPosition(ShapeSlot shapeSlot)
         {
-            for (int row = 0; row < _rows; row++)
+            for (int row = 0; row < Rows; row++)
             {
-                for (int column = 0; column < _columns; column++)
+                for (int column = 0; column < Columns; column++)
                 {
                     if (ShapeSlots[row, column] == shapeSlot)
                     {
@@ -80,9 +67,9 @@ namespace ShapeMatchingGame.Grid
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            for (int row = 0; row < _rows; row++)
+            for (int row = 0; row < Rows; row++)
             {
-                for (int column = 0; column < _columns; column++)
+                for (int column = 0; column < Columns; column++)
                 {
                     ShapeSlots[row, column].Draw(spriteBatch);
                 }
@@ -91,7 +78,33 @@ namespace ShapeMatchingGame.Grid
 
         public bool DoMove(Position from, Position to)
         {
-            return _gridModel.DoMove(new Move(from, to));
+            if(base.DoMove(new Move(from,to)))
+            {
+                //swap the slots
+                IShapeView temp = ShapeSlots[from.Row, from.Column].AssignedShape;
+                ShapeSlots[from.Row, from.Column].AssignShape(ShapeSlots[to.Row, to.Column].AssignedShape);
+                ShapeSlots[to.Row, to.Column].AssignShape(temp);
+                foreach(ShapeSlot shapeSlot in ShapeSlots)
+                {
+                    shapeSlot.RecentlyDestroyed = shapeSlot.AssignedShape.Destroyed;
+                }
+                AssignShapes();
+                return true;
+            }
+            return false;
+        }
+        private void AssignShapes()
+        {
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int column = 0; column < Columns; column++)
+                {
+                    if (ShapeSlots[row, column].AssignedShape != Shapes[row, column])
+                    {
+                        ShapeSlots[row, column].AssignShape(Shapes[row, column]);
+                    }
+                }
+            }
         }
 
         public void Clicked(Point position)

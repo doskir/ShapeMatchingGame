@@ -28,5 +28,11 @@ namespace ShapeMatchingGame
             IShapeView shapeView = Activator.CreateInstance(specificType, ShapeColor.None, ShapeType.None) as IShapeView;
             return shapeView;
         }
+        public IShapeView GetShapeView(ShapeColor shapeColor,ShapeType shapeType)
+        {
+            Type specificType = typeof (TShapeViewType);
+            IShapeView shapeView = Activator.CreateInstance(specificType, shapeColor, shapeType) as IShapeView;
+            return shapeView;
+        }
     }
 }

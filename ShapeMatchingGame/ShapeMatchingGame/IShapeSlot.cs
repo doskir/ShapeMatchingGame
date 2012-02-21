@@ -15,7 +15,6 @@ namespace ShapeMatchingGame
         bool IsEmpty { get; }
         ShapeColor ShapeColor { get; }
         ShapeType ShapeType { get; }
-        void DestroyShape();
         void AssignShape(IShapeView shapeView);
     }
 }
