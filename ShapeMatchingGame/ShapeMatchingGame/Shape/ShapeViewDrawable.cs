@@ -54,6 +54,11 @@ namespace ShapeMatchingGame.Shape
                 _overlayTexture = Globals.Content.Load<Texture2D>("bomb-icon");
             if (ShapeType == ShapeType.Cross)
                 _overlayTexture = Globals.Content.Load<Texture2D>("cross");
+            if(ShapeType == ShapeType.Star)
+            {
+                Texture = Globals.Content.Load<Texture2D>("star");
+                _shapeDrawColor = Color.Black;
+            }
         }
         public ShapeViewDrawable(ShapeColor shapeColor,ShapeType shapeType):this(shapeColor,shapeType,new Rectangle(0,-50,50,50))
         {

@@ -30,7 +30,8 @@
         Violet = 4,
         White = 5,
         Yellow = 6,
-        None
+        None,
+        Any //means it matches any color
     }
 
     public enum ShapeType

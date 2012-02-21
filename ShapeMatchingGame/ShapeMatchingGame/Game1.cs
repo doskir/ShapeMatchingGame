@@ -99,7 +99,6 @@ namespace ShapeMatchingGame
                 if (_gridViewDrawable.Rectangle.Contains(cursorPosition))
                 {
                     _gridViewDrawable.Update();
-                    //_gridViewDrawable.DebugFunctionAt(cursorPosition);
                 }
             }
 

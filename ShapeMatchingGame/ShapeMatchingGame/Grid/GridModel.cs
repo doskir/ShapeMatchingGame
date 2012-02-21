@@ -85,6 +85,8 @@ namespace ShapeMatchingGame.Grid
                     return false;
                 if (Shapes[move.From.Row, move.From.Column].IsEmpty || Shapes[move.To.Row, move.To.Column].IsEmpty)
                     return false;
+                if (Shapes[move.From.Row, move.From.Column].ShapeType == ShapeType.Star || Shapes[move.To.Row, move.To.Column].ShapeType == ShapeType.Star)
+                    return true;
                 Swap(move.From, move.To);
                 isValid = GetMatchAtPosition(move.To).IsValid
                           || GetMatchAtPosition(move.From).IsValid;
@@ -131,11 +133,50 @@ namespace ShapeMatchingGame.Grid
         }
         private Match GetMatchAtPosition(Position position)
         {
+            List<Position> involvedShapes = new List<Position>();
             int rows = Shapes.GetLength(0);
             int columns = Shapes.GetLength(1);
             ShapeColor myColor = Shapes[position.Row, position.Column].ShapeColor;
             if (myColor == ShapeColor.None)
                 return Match.Empty;
+            ShapeType myType = Shapes[position.Row, position.Column].ShapeType;
+
+
+
+            if(myType == ShapeType.Star && Shapes[position.Row,position.Column].RecentlySwapped)
+            {
+                //first find the color of the shape we swapped the star shape with
+                ShapeColor toBeDestroyedColor = ShapeColor.None;
+                for(int row = 0;row < Rows;row++)
+                {
+                    if (toBeDestroyedColor != ShapeColor.None)
+                        break;
+                    for(int column = 0;column < Columns;column++)
+                    {
+                        if (row == position.Row && column == position.Column)
+                            continue;
+                        if(Shapes[row,column].RecentlySwapped)
+                        {
+                            toBeDestroyedColor = Shapes[row, column].ShapeColor;
+                            break;
+                        }
+                    }
+                }
+                //now find all shapes of the same color
+                //if the star shape was matched with another star shape we destroy ALL shapes on the board
+                for(int row = 0;row < Rows;row++)
+                {
+                    for(int column = 0; column < Columns;column++)
+                    {
+                        if (Shapes[row, column].ShapeColor == toBeDestroyedColor || toBeDestroyedColor == ShapeColor.Any)
+                            involvedShapes.Add(new Position(row, column));
+                    }
+                }
+                return new Match(involvedShapes, position, Creates.Nothing);
+            }
+            
+
+
             List<Position> matchingShapesLeft = new List<Position>();
             for (int column = position.Column - 1; column >= 0; column--)
             {
@@ -195,7 +236,7 @@ namespace ShapeMatchingGame.Grid
             {
                 creates = Creates.Blast;
             }
-            List<Position> involvedShapes = new List<Position>(horizontalMatch);
+            involvedShapes.AddRange(horizontalMatch);
             involvedShapes.AddRange(verticalMatch);
             Match match = new Match(involvedShapes, position, creates);
             return match;
@@ -254,16 +295,20 @@ namespace ShapeMatchingGame.Grid
                         if (bestPosition.Row == -1 && bestPosition.Column == -1)
                             bestPosition = match.Center;
                         if (match.Creates == Creates.Blast)
+                        {
                             Shapes[bestPosition.Row, bestPosition.Column] = _shapeViewGenerator.GetShapeView(color,
                                                                                                              ShapeType
                                                                                                                  .
                                                                                                                  Blast);
-
+                        }
                         else if (match.Creates == Creates.Cross)
                             Shapes[bestPosition.Row, bestPosition.Column] = _shapeViewGenerator.GetShapeView(color,
                                                                                                              ShapeType
                                                                                                                  .
                                                                                                                  Cross);
+                        else if (match.Creates == Creates.Star)
+                            Shapes[bestPosition.Row, bestPosition.Column] =
+                                _shapeViewGenerator.GetShapeView(ShapeColor.Any, ShapeType.Star);
                     }
 
                 }
@@ -344,7 +389,7 @@ namespace ShapeMatchingGame.Grid
                     DestroyShape(blastPosition, ref score);
                 }
             }
-            if (type == ShapeType.Cross)
+            else if (type == ShapeType.Cross)
             {
                 List<Position> positionsToClear = new List<Position>();
                 for (int row = 0; row < rows; row++)
