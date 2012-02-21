@@ -7,8 +7,8 @@ namespace ShapeMatchingGame
 {
     class Move
     {
-        public Position From;
-        public Position To;
+        public readonly Position From;
+        public readonly Position To;
         public int PredictedScore;
         public Move(Position from,Position to,int predictedScore = 0)
         {
