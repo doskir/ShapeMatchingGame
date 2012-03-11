@@ -93,6 +93,14 @@ namespace ShapeMatchingGame
                     _gridViewDrawable.Click(cursorPosition);
                 }
             }
+            if(currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Pressed)
+            {
+                Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);
+                if(_gridViewDrawable.Rectangle.Contains(cursorPosition))
+                {
+                    _gridViewDrawable.DragTo(cursorPosition);
+                }
+            }
             if(currentMouseState.RightButton == ButtonState.Pressed && _previousMouseState.RightButton == ButtonState.Released)
             {
                 Point cursorPosition = new Point(currentMouseState.X, currentMouseState.Y);

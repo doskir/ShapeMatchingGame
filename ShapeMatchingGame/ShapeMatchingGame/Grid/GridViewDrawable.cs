@@ -105,6 +105,31 @@ namespace ShapeMatchingGame.Grid
                 }
             }
         }
+        public void DragTo(Point point)
+        {
+            //cant drag anywhere if we don't have a highlighted slot
+            if (_currentlyHighlightedShapeSlot == null || _currentlyHighlightedShapeSlot.IsEmpty)
+                return;
+            if (_currentlyHighlightedShapeSlot.Rectangle.Contains(point))
+            {
+                //didn't actually drag anywhere
+                return;
+            }
+            foreach (ShapeSlot slot in ShapeSlots)
+            {
+                if (slot.Rectangle.Contains(point))
+                {
+                    Position from = GetShapeSlotPosition(_currentlyHighlightedShapeSlot);
+                    Position to = GetShapeSlotPosition(slot);
+                    if (DoMove(new Move(from, to)))
+                    {
+                        _currentlyHighlightedShapeSlot.IsHighlighted = false;
+                        _currentlyHighlightedShapeSlot = null;
+                    }
+                }
+            }
+
+        }
         private void SwapAssignedShapes(ShapeSlot shapeSlot,ShapeSlot other)
         {
             IShapeView temp = shapeSlot.AssignedShape;
@@ -138,5 +163,7 @@ namespace ShapeMatchingGame.Grid
             }
             throw new Exception("Shapeslot is not part of the grid. WTF!");
         }
+
+
     }
 }
